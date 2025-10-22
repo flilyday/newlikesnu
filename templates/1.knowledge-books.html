@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Knowledge Books</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="w-full mx-auto p-4 bg-white">
+    <div class="grid grid-cols-12 gap-8">
+        <!-- 사이드바 -->
+        <aside class="col-span-2">
+            <div class="mb-8">
+                <h2 class="text-xl font-bold border-b-2 border-black pb-2 mb-4">지식의 발견</h2>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="text-blue-600 font-bold">맞춤형 추천 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">서울대학교 트렌딩 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">구성원별 많이 읽고 있는 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">인기문학도서(최근 1개월)</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">인기학술도서(최근 1개월)</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">전공 학생들이 많이 읽고 있는 책</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">최근 서울대인들의 관심사는?</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">최근 클릭이 많은 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">전문가 컬렉션</a></li>
+                </ul>
+            </div>
+            <div class="mb-8">
+                <h2 class="text-xl font-bold border-b-2 border-black pb-2 mb-4">신규 도서 추천 시퀀스</h2>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">이주의 도서(서울대에서 한 주간 가장 예약이 많았던 도서)</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">학과별 다 예약 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">특정 강의 추천 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">키워드 연관 도서(구글 트렌즈와 연동한 중앙도서관이 보유하고 있는 대표 도서)</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">테마 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">내가 수강하고 있는 강좌를 수강한 학생들이 최근 5년간 가장 많이 빌린 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">000~900중 최근 1년내 다 대출된 도서 100</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">학과별 다대출 도서 : UI학과별로 하기</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">과목별 도서 : UI과목별로 하기</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">스테디 셀러</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">새로 들어온 책</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="col-span-10">
+            <div class="flex justify-between items-center border-b-2 border-black pb-2 mb-4">
+                <h2 class="text-2xl font-bold">맞춤형 추천 도서</h2>
+                <a href="#" class="text-sm text-gray-600">더보기 +</a>
+            </div>
+
+            <!-- 도서 목록 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-8">
+                {% for book in books %}
+                <div class="text-center flex flex-col">
+                    <div class="relative">
+                        <img src="{{ book.thumb_url }}" alt="{{ book.title }}" class="w-full h-auto object-cover shadow-md" style="height: 250px;">
+                        <span class="absolute top-0 left-0 bg-gray-800 text-white text-xs font-bold px-2 py-1">{{ loop.index }}</span>
+                    </div>
+                    <div class="flex flex-col justify-between flex-grow mt-2">
+                        <div>
+                            <h3 class="text-sm font-semibold" style="min-height: 40px;">{{ book.title }}</h3>
+                            <p class="text-xs text-gray-600">{{ book.author }}</p>
+                            <p class="text-xs text-gray-600">{{ book.publisher }} | {{ book.pub_date }}</p>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1 text-left" style="overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;">{{ book.description if book.description else '' }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const categoryLinks = document.querySelectorAll('aside a');
+        const mainTitle = document.querySelector('main h2.text-2xl.font-bold');
+
+        categoryLinks.forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Reset all links to default style
+                categoryLinks.forEach(l => {
+                    l.classList.remove('text-blue-600', 'font-bold');
+                    l.classList.add('text-gray-600', 'hover:text-blue-600');
+                });
+
+                // Apply active style to the clicked link
+                this.classList.add('text-blue-600', 'font-bold');
+                this.classList.remove('text-gray-600', 'hover:text-blue-600');
+
+                // Update the main title
+                mainTitle.textContent = this.textContent;
+            });
+        });
+    });
+</script>
+</body>
+</html>

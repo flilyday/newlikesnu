@@ -1,0 +1,72 @@
+<div class="w-full mx-auto p-4 bg-white">
+    <div class="grid grid-cols-12 gap-8">
+        <!-- 사이드바 -->
+        <aside class="col-span-2">
+            <div class="mb-8">
+                <h2 class="text-xl font-bold border-b-2 border-black pb-2 mb-4">지식의 발견</h2>
+                <ul class="space-y-2 text-sm" id="category-list">
+                    <li><a href="#" class="text-blue-600 font-bold">맞춤형 추천 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">서울대학교 트렌딩 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">구성원별 많이 읽고 있는 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">인기문학도서(최근 1개월)</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">인기학술도서(최근 1개월)</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">전공 학생들이 많이 읽고 있는 책</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">최근 서울대인들의 관심사는?</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">최근 클릭이 많은 도서</a></li>
+                    <li><a href="#" class="text-gray-600 hover:text-blue-600">전문가 컬렉션</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="col-span-10">
+            <div class="flex justify-between items-center border-b-2 border-black pb-2 mb-4">
+                <h2 class="text-2xl font-bold" id="main-title">맞춤형 추천 도서</h2>
+                <a href="#" class="text-sm text-gray-600">더보기 +</a>
+            </div>
+
+            <!-- 도서 목록 -->
+            <div class="grid grid-cols-5 gap-x-6 gap-y-8">
+                {% if books %}
+                {% for book in books %}
+                <div class="text-center">
+                    <div class="relative">
+                        <img src="{{ book.image_url }}" alt="{{ book.title_nm }}" class="w-full h-auto object-cover shadow-md">
+                        <span class="absolute top-0 left-0 bg-gray-800 text-white text-xs font-bold px-2 py-1">{{ loop.index }}</span>
+                    </div>
+                    <h3 class="text-sm font-semibold mt-2">{{ book.title_nm }}</h3>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p>도서 정보를 불러오지 못했습니다.</p>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const categoryList = document.getElementById('category-list');
+        const mainTitle = document.getElementById('main-title');
+        const links = categoryList.getElementsByTagName('a');
+
+        categoryList.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (e.target.tagName === 'A') {
+                // Remove active styles from all links
+                for (let i = 0; i < links.length; i++) {
+                    links[i].classList.remove('text-blue-600', 'font-bold');
+                    links[i].classList.add('text-gray-600');
+                }
+
+                // Add active styles to the clicked link
+                e.target.classList.add('text-blue-600', 'font-bold');
+                e.target.classList.remove('text-gray-600');
+
+                // Update the main title
+                mainTitle.textContent = e.target.textContent;
+            }
+        });
+    });
+</script>

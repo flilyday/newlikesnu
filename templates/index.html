@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기능 요구사항 프로토타입</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 사용자 정의 스타일 */
+        /* 활성 탭 버튼 스타일 */
+        .tab-active {
+            background-color: #3b82f6; /* blue-500 */
+            color: #ffffff; /* white */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .dark .tab-active {
+            background-color: #60a5fa; /* blue-400 */
+            color: #111827; /* gray-900 */
+        }
+
+        /* 비활성 탭 버튼 스타일 */
+        .tab-inactive {
+            color: #4b5563; /* gray-600 */
+            background-color: #e5e7eb; /* gray-200 */
+        }
+        .dark .tab-inactive {
+            color: #d1d5db; /* gray-300 */
+            background-color: #374151; /* gray-700 */
+        }
+
+        /* 탭 버튼 호버 효과 */
+        .tab-button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
+
+    <div class="container mx-auto p-4 md:p-8">
+<!--        <header class="mb-8 text-center">-->
+<!--            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">기능 프로토타입</h1>-->
+<!--        </header>-->
+
+        <!-- 탭 네비게이션 (2줄 버튼 형식) -->
+        <div id="tab-container" class="mb-6 p-4">
+            <div class="flex flex-col items-center gap-3">
+                <!-- 1열 -->
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button class="tab-button whitespace-nowrap py-2 px-5 rounded-lg font-semibold text-sm transition-all duration-200" data-tab="1.knowledge-books">📚 도서 추천</button>
+                    <button class="tab-button whitespace-nowrap py-2 px-5 rounded-lg font-semibold text-sm transition-all duration-200" data-tab="2.knowledge-paper">📝 논문 포스트 잇</button>
+                    <button class="tab-button whitespace-nowrap py-2 px-5 rounded-lg font-semibold text-sm transition-all duration-200" data-tab="3.knowledge-mailing">📧 메일링 서비스</button>
+                    <button class="tab-button whitespace-nowrap py-2 px-5 rounded-lg font-semibold text-sm transition-all duration-200" data-tab="4.knowledge-empty-class">⏳ 공강 채우기</button>
+                    <button class="tab-button whitespace-nowrap py-2 px-5 rounded-lg font-semibold text-sm transition-all duration-200" data-tab="5.knowledge-subject">📖 과목별 지식 추천</button>
+                </div>
+                <!-- 2열 -->
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button class="tab-button whitespace-nowrap py-2 px-5 rounded-lg font-semibold text-sm transition-all duration-200" data-tab="6.knowledge-trends">📈 지식 동향</button>
+                    <button class="tab-button whitespace-nowrap py-2 px-5 rounded-lg font-semibold text-sm transition-all duration-200" data-tab="7.search-ai">🤖 검색 AI OverView</button>
+                    <button class="tab-button whitespace-nowrap py-2 px-5 rounded-lg font-semibold text-sm transition-all duration-200" data-tab="8.search-trends">📊 서울대 지식 이용 트렌드</button>
+                    <button class="tab-button whitespace-nowrap py-2 px-5 rounded-lg font-semibold text-sm transition-all duration-200" data-tab="9.academic-major">📜 다전공 내역</button>
+                    <button class="tab-button whitespace-nowrap py-2 px-5 rounded-lg font-semibold text-sm transition-all duration-200" data-tab="10.academic-gpa">🎓 학점 시뮬레이션</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 탭 콘텐츠 영역 -->
+        <main id="tab-content-container" class="bg-white dark:bg-gray-900/70 p-6 rounded-xl shadow-lg backdrop-blur-sm min-h-[200px]">
+            <!-- 콘텐츠가 여기에 동적으로 로드됩니다. -->
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabContentContainer = document.getElementById('tab-content-container');
+
+            async function loadTabContent(tabName) {
+                // 로딩 상태 표시
+                tabContentContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400">로딩 중...</p>';
+                
+                try {
+                    // templates 폴더에 있는 해당 html 파일을 가져옵니다.
+                    const response = await fetch(`${tabName}.html`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const content = await response.text();
+                    tabContentContainer.innerHTML = content;
+
+                } catch (error) {
+                    console.error('콘텐츠 로딩 오류:', error);
+                    tabContentContainer.innerHTML = `<p class="text-center text-red-500">콘텐츠를 불러오는 데 실패했습니다. 로컬에서 직접 파일을 여는 경우, 웹 서버 환경에서 실행해야 제대로 작동합니다.</p>`;
+                }
+            }
+
+            function activateTab(tabToActivate) {
+                const target = tabToActivate.getAttribute('data-tab');
+
+                // 모든 탭 스타일 초기화
+                tabs.forEach(t => {
+                    t.classList.remove('tab-active');
+                    t.classList.add('tab-inactive');
+                });
+
+                // 클릭된 탭에 활성 스타일 적용
+                tabToActivate.classList.add('tab-active');
+                tabToActivate.classList.remove('tab-inactive');
+
+                // 해당 탭 콘텐츠 로드
+                loadTabContent(target);
+            }
+
+            // 초기 활성 탭 설정
+            if (tabs.length > 0) {
+                activateTab(tabs[0]);
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                   activateTab(tab);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
