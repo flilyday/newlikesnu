@@ -3,30 +3,694 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>공강 채우기</title>
-    <!-- Tailwind CSS CDN -->
+    <title>공강 채우기 프로토타입</title>
+    <!-- Tailwind CSS 로드 -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter 폰트 로드 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
     <style>
-        /* These styles are copied from index.html to maintain consistency */
+        /* Noto Sans KR 폰트를 기본으로 사용하고, Inter를 fallback으로 지정 */
         body {
-            background-color: #f3f4f6; /* gray-100 */
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            background-color: #f8f9fa;
         }
-        .dark body {
-            background-color: #1f2937; /* gray-800 */
+
+        /* 시간 레이블 컬럼 그리드 설정 */
+        #time-labels {
+            display: grid;
+            grid-template-rows: 0.5fr repeat(9, 1fr);
+            gap: 2px;
+            width: 4rem; /* 시간 컬럼 너비 고정 */
         }
+
+        /* 시간표 그리드 설정 */
+        #timetable-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: 0.5fr repeat(9, 1fr);
+            gap: 2px;
+        }
+
+        /* 그리드 셀 기본 스타일 */
+        .grid-cell {
+            background-color: white;
+            border-radius: 8px;
+            padding: 8px;
+            min-height: 80px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* 헤더 셀 스타일 */
+        .header-cell {
+            background-color: #f1f3f5;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.875rem; /* 14px */
+            color: #495057;
+        }
+
+        /* 시간 셀 스타일 */
+        .time-cell {
+            font-size: 0.75rem; /* 12px */
+            font-weight: 500;
+            color: #868e96;
+            background-color: #f8f9fa;
+            box-shadow: none;
+            border: none;
+            justify-content: flex-end;
+            padding-right: 12px;
+        }
+
+        /* 공강(빈) 셀 스타일 */
+        .gap-cell {
+            background-color: #f8f9fa;
+            border: 1px dashed #ced4da;
+            cursor: pointer;
+            box-shadow: none;
+        }
+
+        .gap-cell:hover, .gap-cell.selected {
+            background-color: #e7f5ff;
+            border-style: solid;
+            border-color: #339af0;
+        }
+
+        /* 수강과목 셀 스타일 */
+        .class-cell {
+            font-size: 0.875rem; /* 14px */
+            line-height: 1.4;
+            border-left-width: 4px;
+            cursor: pointer; /* [NEW] 수업 셀도 클릭 가능하도록 */
+        }
+
+        .class-cell strong {
+            font-weight: 600;
+            color: #343a40;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .class-cell span {
+            font-size: 0.75rem; /* 12px */
+            color: #495057;
+        }
+
+        /* [NEW] 선택된 수업 셀 스타일 */
+        .class-cell.selected {
+            box-shadow: 0 0 0 3px #1c7ed6; /* 파란색 테두리 */
+            border-color: #1c7ed6;
+        }
+
+        /* 추천 카드 스타일 */
+        .recommendation-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeIn 0.3s forwards;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .recommendation-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 추천 섹션 헤더 스타일 */
+        .recommendation-sector h2 {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        /* 모달 스타일 */
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none; /* 기본 숨김 */
+            z-index: 40;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #modal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 50;
+            display: none; /* 기본 숨김 */
+            opacity: 0;
+            transform: translate(-50%, -45%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #modal-overlay.active, #modal-content.active {
+            display: block;
+            opacity: 1;
+        }
+
+        #modal-content.active {
+             transform: translate(-50%, -50%);
+        }
+
+        #modal-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        #modal-content .modal-details p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        #modal-content .modal-details ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: #555;
+        }
+
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
+<body class="p-4 md:p-8">
 
-    <div class="container mx-auto p-4 md:p-8">
-        <main id="tab-content-container" class="bg-white dark:bg-gray-900/70 p-6 rounded-xl shadow-lg backdrop-blur-sm min-h-[200px]">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">⏳ 공강 채우기</h2>
-            <p class="text-gray-600 dark:text-gray-300">학생의 시간표상 공강 시간을 분석하여, 해당 시간에 들을 수 있는 추천 강의, 참여 가능한 스터디, 관련 도서/논문 등을 추천하는 화면입니다.</p>
-            <div class="mt-6 p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center">
-                <p class="text-gray-500 dark:text-gray-400">[시간표 및 추천 활동 UI가 표시될 영역]</p>
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-6 flex flex-col sm:flex-row justify-between sm:items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">공강 채우기</h1>
+                <p class="text-lg text-gray-600 mt-1">내 시간표의 빈틈을 알차게!</p>
             </div>
-        </main>
+            <!-- 클릭한 공강/수업 시간 정보 헤더 -->
+            <div id="recommendation-header-text" class="text-lg font-semibold text-blue-600 mt-2 sm:mt-0">
+                <!-- JS will update this -->
+            </div>
+        </header>
+
+        <div class="flex flex-col gap-6">
+
+            <!-- 시간표 -->
+            <div class="w-full">
+                <div class="flex gap-2">
+                    <div id="time-labels"><!-- JS로 채워짐 --></div>
+                    <div id="timetable-grid" class="flex-1"><!-- JS로 채워짐 --></div>
+                </div>
+            </div>
+
+            <!-- [MODIFIED] 추천 섹션 (동적 컨텐츠 영역) -->
+            <div id="recommendation-display-area" class="w-full mt-4 hidden">
+                <!-- JS will populate this area with either gap recs or class recs -->
+            </div>
+        </div>
     </div>
 
+    <!-- 모달 (팝업) 창 -->
+    <div id="modal-overlay"></div>
+    <div id="modal-content">
+        <button id="modal-close-btn" class="absolute top-4 right-6 text-3xl font-light text-gray-500 hover:text-gray-800">&times;</button>
+        <h3 id="modal-title"></h3>
+        <div id="modal-details" class="modal-details">
+            <!-- JS will populate this -->
+        </div>
+    </div>
+
+
+    <script>
+        // --- 데이터 ---
+
+        // [MODIFIED] 학생 수강과목 데이터 (ID 추가)
+        const studentSchedule = [
+            { id: 'c1', day: 'Mon', start: 9, duration: 2, title: '양궁', loc: '종합체육관', color: 'bg-red-100 border-red-300' },
+            { id: 'c2', day: 'Mon', start: 14, duration: 2, title: '데이터 과학 입문', loc: '정보관 301', color: 'bg-indigo-100 border-indigo-300' },
+            { id: 'c3', day: 'Tue', start: 14, duration: 2, title: '사람다운 사람의 길', loc: '진리502', color: 'bg-pink-100 border-pink-300' },
+            { id: 'c4', day: 'Wed', start: 10, duration: 2, title: '기초코딩', loc: '공학관501', color: 'bg-green-100 border-green-300' },
+            { id: 'c5', day: 'Thu', start: 15, duration: 2, title: '재난 및 안전관리', loc: '조형214', color: 'bg-blue-100 border-blue-300' },
+            { id: 'c6', day: 'Thu', start: 17, duration: 2, title: '고급 통계학', loc: '자연대 205', color: 'bg-orange-100 border-orange-300' },
+            { id: 'c7', day: 'Fri', start: 9, duration: 2, title: '프레젠테이션 (기업가정신)', loc: '조형214', color: 'bg-purple-100 border-purple-300' },
+            { id: 'c8', day: 'Fri', start: 13, duration: 2, title: '창업 세미나', loc: '경영대 101', color: 'bg-teal-100 border-teal-300' }
+        ];
+
+        // [NEW] 수업-연관 추천 데이터
+        const courseRecommendations = {
+            'c1': { // 양궁
+                recommendedBooks: [
+                    { id: 'cr_c1_1', title: '양궁 101', desc: '기초부터 고급 기술까지', details: '<p>양궁의 모든 것을 다루는 입문서입니다.</p><ul><li>저자: 김궁수</li><li>출판사: 한국체육출판사</li></ul>' },
+                    { id: 'cr_c1_2', title: '스포츠 심리학', desc: '멘탈 관리의 중요성', details: '<p>집중력과 평정심을 유지하는 방법을 배웁니다.</p>' }
+                ],
+                recommendedLectures: [
+                    { id: 'cl_c4_1', title: '생활코딩: Python', desc: '무료 온라인 코딩 강의', details: '<p>유명한 \'생활코딩\'의 파이썬 강의입니다. 기초를 다지기 좋습니다.</p>' }
+                ]
+            },
+            'c5': { // 재난 및 안전관리
+                recommendedPapers: [
+                    { id: 'cp_c5_1', title: '도시 재난 관리 시스템 고찰', desc: '최신 재난 관리 트렌드', details: '<p>최근 도시형 재난에 대비하는 시스템에 대한 논문입니다.</p>' }
+                ],
+                recommendedLectures: [
+                    { id: 'cl_c5_1', title: '국민안전방송', desc: '실생활 안전 수칙', details: '<p>다양한 재난 상황에 대비하는 요령을 배울 수 있습니다.</p>' }
+                ]
+            },
+            'c6': { // 고급 통계학
+                required: [
+                    { id: 'cr_c6_1', title: '현대 통계학', desc: '수업 필수 교재', details: '<p>수리통계학의 기초를 다루는 교재입니다.</p>' }
+                ],
+                recommendedPapers: [
+                    { id: 'cp_c6_1', title: 'The Future of Data Analysis', desc: 'J. Tukey (1962)', details: '<p>데이터 분석의 미래를 예견한 고전 논문입니다.</p>' }
+                ]
+            },
+            'c7': { // 프레젠테이션 (기업가정신)
+                recommendedBooks: [
+                    { id: 'cr_c7_1', title: 'TED처럼 말하기', desc: '청중을 사로잡는 법', details: '<p>성공적인 프레젠테이션의 비밀을 담은 책입니다.</p>' }
+                ],
+                recommendedLectures: [
+                    { id: 'cl_c7_1', title: '유튜브: 스티브 잡스 발표', desc: '전설의 프레젠테이션', details: '<p>스티브 잡스의 아이폰 발표 영상을 분석해보세요.</p>' }
+                ]
+            },
+            'c8': { // 창업 세미나
+                recommendedBooks: [
+                    { id: 'cr_c8_1', title: '린 스타트업', desc: '실패하지 않는 창업', details: '<p>현대 스타트업의 필독서입니다.</p>' }
+                ],
+                recommendedPapers: [
+                    { id: 'cp_c8_1', title: 'Why the Lean Start-Up Changes Everything', desc: 'Harvard Business Review', details: '<p>린 스타트업 방법론에 대한 HBR 아티클입니다.</p>' }
+                ]
+            }
+        };
+
+        // 공강 시간 추천 데이터
+        const allRecommendations = [
+            // ... (기존 공강 추천 데이터는 동일하게 유지) ...
+            { id: 5, category: 'library', title: '도서추천: \'사피엔스\' 읽기', type: '도서추천', duration: 1, desc: '중앙도서관 \'이달의 추천도서\'. 1시간 집중 독서.', details: '<p>... (상세내용) ...</p>'},
+            { id: 9, category: 'library', title: '논문 읽기: \'챗GPT의 교육적 활용\'', type: '논문/도서', duration: 1, desc: '최신 AI 관련 교육학 논문 읽기. (상시).', details: '<p>... (상세내용) ...</p>'},
+            { id: 1, category: 'class', title: '도서관 \'데이터 분석\' 스터디', type: '스터디', day: 'Mon', start: 10, duration: 2, desc: '중앙도서관 1층 스터디룸에서 진행. R, 파이썬 기초.', details: '<h3>... (상세내용) ...</h3>'},
+            { id: 3, category: 'class', title: '취업지원팀 \'AI시대의 자기소개서\' 특강', type: '특강', day: 'Fri', start: 14, duration: 2, desc: '학생회관 2층 대강당. 현직자 멘토링 포함.', details: '<h3>... (상세내용) ...</h3>'},
+            { id: 4, category: 'class', title: '\'인공지능 입문\' 온라인 강좌', type: '추천강의', duration: 1, desc: '우리 대학 MOOC. 1시간 단위로 학습 가능. (상시).', details: '<p>... (상세내용) ...</p>'},
+            { id: 7, category: 'class', title: '코딩 동아리 \'파이썬 기초\' 세션', type: '스터디', day: 'Wed', start: 15, duration: 2, desc: '제1공학관 101호. 비전공자 환영.', details: '<p>... (상세내용) ...</p>'},
+            { id: 2, category: 'cultural', title: '중앙광장 밴드 버스킹', type: '문화행사', day: 'Wed', start: 13, duration: 1, desc: '중앙광장 특설 무대. 밴드 동아리 \'사운드웨이브\' 공연.', details: '<h3>... (상세내용) ...</h3>'},
+            { id: 6, category: 'cultural', title: '학생회관 \'명상과 힐링\' 프로그램', type: '문화행사', day: 'Mon', start: 14, duration: 1, desc: '학생상담센터 주관. 3층 힐링존. (선착순).', details: '<p>... (상세내용) ...</p>'},
+            { id: 8, category: 'cultural', title: '총학생회 주관 \'플리마켓\'', type: '문화행사', day: 'Fri', start: 13, duration: 3, desc: '중앙광장 일대. 다양한 수공예품과 먹거리.', details: '<p>... (상세내용) ...</p>'},
+            { id: 10, category: 'cultural', title: '박물관 특별 전시 관람', type: '문화행사', day: 'Tue', start: 12, duration: 1, desc: '우리 대학 박물관 \'조선의 미\' 특별전.', details: '<p>... (상세내용) ...</p>'}
+        ];
+
+        // --- 전역 변수 ---
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        const dayKorean = { 'Mon': '월', 'Tue': '화', 'Wed': '수', 'Thu': '목', 'Fri': '금' };
+        const timePeriods = [9, 10, 11, 12, 13, 14, 15, 16, 17];
+        const timeLabels = ['9:00', '10:00', '11:00', '12:00', '1:00', '2:00', '3:00', '4:00', '5:00'];
+
+        const timetableGrid = document.getElementById('timetable-grid');
+        const timeLabelsContainer = document.getElementById('time-labels');
+
+        const recommendationHeaderText = document.getElementById('recommendation-header-text');
+        const recommendationDisplayArea = document.getElementById('recommendation-display-area');
+
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalContent = document.getElementById('modal-content');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDetails = document.getElementById('modal-details');
+
+        const scheduleMap = new Map();
+
+        // --- 함수 ---
+
+        /**
+         * 1. 시간표 그리드 초기화 및 렌더링
+         */
+        function initializeTimetable() {
+            timetableGrid.innerHTML = '';
+            timeLabelsContainer.innerHTML = '';
+
+            const timeHeader = createCell('시간', 'header-cell time-cell-header');
+            timeHeader.style.minHeight = 'auto';
+            timeLabelsContainer.appendChild(timeHeader);
+
+            timePeriods.forEach((period, index) => {
+                const timeCell = createCell(timeLabels[index], 'header-cell time-cell');
+                timeLabelsContainer.appendChild(timeCell);
+            });
+
+            days.forEach(day => {
+                const dayHeader = createCell(dayKorean[day], 'header-cell');
+                dayHeader.style.minHeight = 'auto';
+                timetableGrid.appendChild(dayHeader);
+            });
+
+            timePeriods.forEach((period, index) => {
+                days.forEach(day => {
+                    const cellId = `${day}-${period}`;
+                    scheduleMap.set(cellId, 'empty');
+                    const cell = createCell('', 'grid-cell gap-cell', cellId);
+                    cell.dataset.day = day;
+                    cell.dataset.period = period;
+                    timetableGrid.appendChild(cell);
+                });
+            });
+        }
+
+        /**
+         * 2. 수강과목을 시간표에 배치
+         */
+        function placeStudentSchedule() {
+            studentSchedule.forEach(course => {
+                for (let i = 0; i < course.duration; i++) {
+                    const period = course.start + i;
+                    const cellId = `${course.day}-${period}`;
+                    const cell = document.getElementById(cellId);
+
+                    if (!cell) continue;
+
+                    scheduleMap.set(cellId, 'filled');
+                    cell.classList.remove('gap-cell');
+                    cell.classList.add('class-cell', ...course.color.split(' '));
+
+                    if (i === 0) {
+                        cell.innerHTML = `
+                            <strong>${course.title}</strong>
+                            <span>${course.loc}</span>
+                        `;
+                        cell.style.gridRowStart = `span ${course.duration}`;
+
+                        // [NEW] 수업 셀 클릭 이벤트 리스너 추가
+                        cell.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            handleClassClick(cell, course);
+                        });
+                    } else {
+                        cell.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        /**
+         * 3. 연속된 공강 시간 그룹화
+         */
+        function groupAdjacentGaps() {
+            let gapGroupId = 0;
+            days.forEach(day => {
+                let currentGapGroup = null;
+                timePeriods.forEach(period => {
+                    const cellId = `${day}-${period}`;
+                    if (scheduleMap.get(cellId) === 'empty') {
+                        if (currentGapGroup === null) {
+                            gapGroupId++;
+                            currentGapGroup = { id: gapGroupId, day: day, start: period, duration: 1 };
+                        } else {
+                            currentGapGroup.duration += 1;
+                        }
+                        scheduleMap.set(cellId, `gap-${gapGroupId}`);
+                        const cell = document.getElementById(cellId);
+                        cell.dataset.gapGroupId = gapGroupId;
+                        cell.dataset.gapInfo = JSON.stringify(currentGapGroup);
+                    } else {
+                        currentGapGroup = null;
+                    }
+                });
+            });
+
+            for (let i = 1; i <= gapGroupId; i++) {
+                const gapCells = document.querySelectorAll(`[data-gap-group-id='${i}']`);
+                if (gapCells.length > 0) {
+                    const firstCell = gapCells[0];
+                    const gapInfo = JSON.parse(firstCell.dataset.gapInfo);
+
+                    firstCell.style.gridRowStart = `span ${gapInfo.duration}`;
+                    firstCell.dataset.gapDuration = gapInfo.duration;
+
+                    firstCell.addEventListener('click', () => handleGapClick(firstCell, gapInfo));
+
+                    for (let j = 1; j < gapCells.length; j++) {
+                        gapCells[j].style.display = 'none';
+                    }
+                }
+            }
+        }
+
+        /**
+         * 4. 공강 셀 클릭 이벤트 핸들러
+         */
+        function handleGapClick(cellElement, gapInfo) {
+            // [MODIFIED] 모든 선택된 셀(수업, 공강) 해제
+            document.querySelectorAll('.gap-cell.selected, .class-cell.selected').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            cellElement.classList.add('selected');
+
+            const recommendations = findRecommendations(gapInfo);
+            displayGapRecommendations(gapInfo, recommendations); // [RENAMED]
+        }
+
+        /**
+         * [NEW] 5. 수업 셀 클릭 이벤트 핸들러
+         */
+        function handleClassClick(cellElement, course) {
+            // [MODIFIED] 모든 선택된 셀(수업, 공강) 해제
+            document.querySelectorAll('.gap-cell.selected, .class-cell.selected').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            cellElement.classList.add('selected');
+
+            const recommendations = courseRecommendations[course.id] || {};
+            displayCourseRecommendations(course, recommendations);
+        }
+
+        /**
+         * 6. 공강 시간에 맞는 추천 활동 필터링
+         */
+        function findRecommendations(gapInfo) {
+            const { day, start, duration } = gapInfo;
+
+            return allRecommendations.filter(rec => {
+                if (!rec.day && rec.duration <= duration) return true;
+                if (rec.day === day && rec.start >= start && (rec.start + (rec.duration || 1)) <= (start + duration)) return true;
+                return false;
+            });
+        }
+
+        /**
+         * 7. 공강 추천 정보 패널에 표시 [RENAMED]
+         */
+        function displayGapRecommendations(gapInfo, recommendations) {
+            recommendationDisplayArea.innerHTML = ''; // 영역 초기화
+            recommendationDisplayArea.classList.remove('hidden');
+
+            // 헤더 텍스트 설정
+            const gapStartLabel = timeLabels[timePeriods.indexOf(gapInfo.start)];
+            const gapEndLabelIndex = timePeriods.indexOf(gapInfo.start + gapInfo.duration - 1);
+            const gapEndLabel = timeLabels[gapEndLabelIndex];
+            const endTimeParts = gapEndLabel.split(':');
+            const endHour = parseInt(endTimeParts[0]);
+            const endMinute = parseInt(endTimeParts[1]) + 50;
+            const formattedEndTime = `${endHour}:${endMinute < 10 ? '0' : ''}${endMinute}`;
+            recommendationHeaderText.textContent = `${dayKorean[gapInfo.day]}요일 ${gapStartLabel} ~ ${formattedEndTime} (${gapInfo.duration}시간 공강)`;
+
+            // [NEW] 공강 추천 섹션 동적 생성
+            recommendationDisplayArea.innerHTML = `
+                <div class="recommendation-sector mb-8">
+                    <h2>📚 도서관 활동</h2>
+                    <div id="library-recs" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+                <div class="recommendation-sector mb-8">
+                    <h2>🎓 수업 활동</h2>
+                    <div id="class-recs" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+                <div class="recommendation-sector">
+                    <h2>🎨 문화 활동</h2>
+                    <div id="cultural-recs" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+            `;
+
+            const libraryRecsContainer = document.getElementById('library-recs');
+            const classRecsContainer = document.getElementById('class-recs');
+            const culturalRecsContainer = document.getElementById('cultural-recs');
+
+            const libraryRecs = recommendations.filter(r => r.category === 'library');
+            const classRecs = recommendations.filter(r => r.category === 'class');
+            const culturalRecs = recommendations.filter(r => r.category === 'cultural');
+
+            if (libraryRecs.length > 0) {
+                libraryRecs.forEach((rec, i) => createRecommendationCard(libraryRecsContainer, rec, i, rec.type));
+            } else {
+                libraryRecsContainer.innerHTML = '<p class="text-gray-500 col-span-full">추천 도서관 활동이 없습니다.</p>';
+            }
+            if (classRecs.length > 0) {
+                classRecs.forEach((rec, i) => createRecommendationCard(classRecsContainer, rec, i, rec.type));
+            } else {
+                classRecsContainer.innerHTML = '<p class="text-gray-500 col-span-full">추천 수업/스터디 활동이 없습니다.</p>';
+            }
+            if (culturalRecs.length > 0) {
+                culturalRecs.forEach((rec, i) => createRecommendationCard(culturalRecsContainer, rec, i, rec.type));
+            } else {
+                culturalRecsContainer.innerHTML = '<p class="text-gray-500 col-span-full">추천 문화 활동이 없습니다.</p>';
+            }
+        }
+
+        /**
+         * [NEW] 8. 수업 추천 정보 패널에 표시
+         */
+        function displayCourseRecommendations(course, recommendations) {
+            recommendationDisplayArea.innerHTML = ''; // 영역 초기화
+            recommendationDisplayArea.classList.remove('hidden');
+
+            recommendationHeaderText.textContent = `'${course.title}' 수업 관련 추천 자료`;
+
+            // 수업 추천 섹션 동적 생성
+            recommendationDisplayArea.innerHTML = `
+                <div class="recommendation-sector mb-8">
+                    <h2>📘 지정 도서</h2>
+                    <div id="required-books" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+                <div class="recommendation-sector mb-8">
+                    <h2>📙 추천 도서</h2>
+                    <div id="recommended-books" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+                <div class="recommendation-sector mb-8">
+                    <h2>📄 추천 논문</h2>
+                    <div id="recommended-papers" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+                <div class="recommendation-sector">
+                    <h2>💻 추천 강의</h2>
+                    <div id="recommended-lectures" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+            `;
+
+            const requiredBooksContainer = document.getElementById('required-books');
+            const recommendedBooksContainer = document.getElementById('recommended-books');
+            const recommendedPapersContainer = document.getElementById('recommended-papers');
+            const recommendedLecturesContainer = document.getElementById('recommended-lectures');
+
+            const { required = [], recommendedBooks = [], recommendedPapers = [], recommendedLectures = [] } = recommendations;
+
+            if (required.length > 0) {
+                required.forEach((rec, i) => createRecommendationCard(requiredBooksContainer, rec, i, '지정도서'));
+            } else {
+                requiredBooksContainer.innerHTML = '<p class="text-gray-500 col-span-full">지정 도서가 없습니다.</p>';
+            }
+            if (recommendedBooks.length > 0) {
+                recommendedBooks.forEach((rec, i) => createRecommendationCard(recommendedBooksContainer, rec, i, '추천도서'));
+            } else {
+                recommendedBooksContainer.innerHTML = '<p class="text-gray-500 col-span-full">추천 도서가 없습니다.</p>';
+            }
+            if (recommendedPapers.length > 0) {
+                recommendedPapers.forEach((rec, i) => createRecommendationCard(recommendedPapersContainer, rec, i, '추천논문'));
+            } else {
+                recommendedPapersContainer.innerHTML = '<p class="text-gray-500 col-span-full">추천 논문이 없습니다.</p>';
+            }
+            if (recommendedLectures.length > 0) {
+                recommendedLectures.forEach((rec, i) => createRecommendationCard(recommendedLecturesContainer, rec, i, '추천강의'));
+            } else {
+                recommendedLecturesContainer.innerHTML = '<p class="text-gray-500 col-span-full">추천 강의가 없습니다.</p>';
+            }
+        }
+
+        /**
+         * 9. 추천 카드 생성 및 이벤트 바인딩 [MODIFIED]
+         */
+        function createRecommendationCard(container, rec, index, type) { // type을 파라미터로 받음
+            const card = document.createElement('div');
+            card.className = 'recommendation-card';
+            card.style.animationDelay = `${index * 0.1}s`;
+
+            // [MODIFIED] type 파라미터를 기반으로 색상 결정
+            let typeColor = 'bg-gray-100 text-gray-700';
+            if(type === '스터디') typeColor = 'bg-blue-100 text-blue-800';
+            if(type === '문화행사') typeColor = 'bg-purple-100 text-purple-800';
+            if(type === '특강') typeColor = 'bg-green-100 text-green-800';
+            if(type.includes('도서')) typeColor = 'bg-yellow-100 text-yellow-800';
+            if(type.includes('지정')) typeColor = 'bg-red-100 text-red-800';
+            if(type.includes('논문')) typeColor = 'bg-indigo-100 text-indigo-800';
+            if(type.includes('강의')) typeColor = 'bg-teal-100 text-teal-800';
+
+            card.innerHTML = `
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${typeColor} mb-2">
+                    ${type}
+                </span>
+                <h4 class="font-semibold text-gray-800 mb-1">${rec.title}</h4>
+                <p class="text-sm text-gray-600">${rec.desc}</p>
+            `;
+
+            card.addEventListener('click', () => openModal(rec));
+
+            container.appendChild(card);
+        }
+
+        /**
+         * 10. 모달 열기
+         */
+        function openModal(rec) {
+            modalTitle.textContent = rec.title;
+            modalDetails.innerHTML = rec.details;
+
+            modalOverlay.classList.add('active');
+            modalContent.classList.add('active');
+        }
+
+        /**
+         * 11. 모달 닫기
+         */
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            modalContent.classList.remove('active');
+        }
+
+        /**
+         * 유틸리티: 그리드 셀 생성
+         */
+        function createCell(content, classNames = '', id = null) {
+            const cell = document.createElement('div');
+            cell.className = `grid-cell ${classNames}`;
+            if (id) cell.id = id;
+            cell.innerHTML = content;
+            return cell;
+        }
+
+        // --- 앱 실행 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTimetable();
+            placeStudentSchedule();
+            groupAdjacentGaps();
+
+            modalCloseBtn.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', closeModal);
+        });
+
+    </script>
 </body>
 </html>
+
+

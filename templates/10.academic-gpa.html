@@ -3,30 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>학점 시뮬레이션</title>
+    <title>4개년 수강 로드맵</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* These styles are copied from index.html to maintain consistency */
+        /* Inter 폰트 적용 (Tailwind 기본) */
         body {
-            background-color: #f3f4f6; /* gray-100 */
+            font-family: 'Inter', sans-serif;
         }
-        .dark body {
-            background-color: #1f2937; /* gray-800 */
+        /* 스크롤바 디자인 (선택 사항) */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #9ca3af;
+            border-radius: 10px;
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
+<body class="bg-gray-100 p-4 md:p-8">
 
-    <div class="container mx-auto p-4 md:p-8">
-        <main id="tab-content-container" class="bg-white dark:bg-gray-900/70 p-6 rounded-xl shadow-lg backdrop-blur-sm min-h-[200px]">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">🎓 학점 시뮬레이션</h2>
-            <p class="text-gray-600 dark:text-gray-300">앞으로 수강할 과목의 예상 학점을 입력하여 전체 졸업 학점을 미리 계산해볼 수 있는 시뮬레이션 화면입니다.</p>
-            <div class="mt-6 p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center">
-                <p class="text-gray-500 dark:text-gray-400">[학점 계산기 UI가 표시될 영역]</p>
+    <div class="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- 1. 헤더 및 컨트롤 영역 -->
+        <header class="p-6 md:p-8 bg-blue-800 text-white">
+            <h1 class="text-3xl font-bold mb-2">4개년 수강 로드맵</h1>
+            <p class="text-blue-200">나의 학업 계획과 선배들의 추천 과목을 한눈에 확인하세요.</p>
+        </header>
+
+        <div class="p-6 md:p-8 border-b border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-center">
+            <!-- 필터 영역 -->
+            <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                <div class="w-full md:w-48">
+                    <label for="admission-year" class="block text-sm font-medium text-gray-700 mb-1">입학년도</label>
+                    <select id="admission-year" class="w-full h-10 px-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <!-- JS로 채워짐 -->
+                    </select>
+                </div>
+                <div class="w-full md:w-64">
+                    <label for="department-select" class="block text-sm font-medium text-gray-700 mb-1">학과 선택</label>
+                    <select id="department-select" class="w-full h-10 px-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="computer_science">컴퓨터공학과</option>
+                        <option value="business">경영학과</option>
+                        <option value="design">디자인학과</option>
+                    </select>
+                </div>
             </div>
-        </main>
+            <!-- 총 학점 -->
+            <div class="text-right mt-4 md:mt-0">
+                <span class="text-gray-600">이수 학점</span>
+                <span id="total-credits" class="text-3xl font-bold text-blue-700 ml-2">0</span>
+                <span class="text-gray-500">/ 130</span>
+            </div>
+        </div>
+
+        <!-- 2. 선배 추천 공통 과목 (요청사항 3) -->
+        <div class="p-6 md:p-8 border-b border-gray-200 bg-gray-50">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">학과 선배 추천 공통 과목</h2>
+            <div id="common-courses-list" class="flex flex-wrap gap-2">
+                <!-- JS로 채워짐 -->
+            </div>
+        </div>
+
+        <!-- 3. 수강 로드맵 그리드 (요청사항 2) -->
+        <div class="p-6 md:p-8">
+            <!--
+                테이블과 유사한 그리드 레이아웃.
+                md:grid-cols-2 는 데스크탑에서 2열 (1학기, 2학기)
+                기본은 1열 (모바일)
+            -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200 border border-gray-200 rounded-lg overflow-hidden">
+
+                <!-- 1학년 -->
+                <div class="md:col-span-2 bg-blue-50 p-3">
+                    <h2 class="text-xl font-bold text-blue-700">1학년 (Freshman)</h2>
+                </div>
+                <div class="bg-white p-4 min-h-[250px]">
+                    <h3 class="font-semibold text-lg mb-3 pb-2 border-b">1학기</h3>
+                    <div id="semester-1-1" class="course-list-container space-y-2">
+                        <!-- JS로 과목 카드 채워짐 -->
+                    </div>
+                </div>
+                <div class="bg-white p-4 min-h-[250px]">
+                    <h3 class="font-semibold text-lg mb-3 pb-2 border-b">2학기</h3>
+                    <div id="semester-1-2" class="course-list-container space-y-2">
+                        <!-- JS로 과목 카드 채워짐 -->
+                    </div>
+                </div>
+
+                <!-- 2학년 -->
+                <div class="md:col-span-2 bg-blue-50 p-3">
+                    <h2 class="text-xl font-bold text-blue-700">2학년 (Sophomore)</h2>
+                </div>
+                <div class="bg-white p-4 min-h-[250px]">
+                    <h3 class="font-semibold text-lg mb-3 pb-2 border-b">1학기</h3>
+                    <div id="semester-2-1" class="course-list-container space-y-2">
+                        <!-- JS로 과목 카드 채워짐 -->
+                    </div>
+                </div>
+                <div class="bg-white p-4 min-h-[250px]">
+                    <h3 class="font-semibold text-lg mb-3 pb-2 border-b">2학기</h3>
+                    <div id="semester-2-2" class="course-list-container space-y-2">
+                        <!-- JS로 과목 카드 채워짐 -->
+                    </div>
+                </div>
+
+                <!-- 3학년 -->
+                <div class="md:col-span-2 bg-blue-50 p-3">
+                    <h2 class="text-xl font-bold text-blue-700">3학년 (Junior)</h2>
+                </div>
+                <div class="bg-white p-4 min-h-[250px]">
+                    <h3 class="font-semibold text-lg mb-3 pb-2 border-b">1학기</h3>
+                    <div id="semester-3-1" class="course-list-container space-y-2">
+                        <!-- JS로 과목 카드 채워짐 -->
+                    </div>
+                </div>
+                <div class="bg-white p-4 min-h-[250px]">
+                    <h3 class="font-semibold text-lg mb-3 pb-2 border-b">2학기</h3>
+                    <div id="semester-3-2" class="course-list-container space-y-2">
+                        <!-- JS로 과목 카드 채워짐 -->
+                    </div>
+                </div>
+
+                <!-- 4학년 -->
+                <div class="md:col-span-2 bg-blue-50 p-3">
+                    <h2 class="text-xl font-bold text-blue-700">4학년 (Senior)</h2>
+                </div>
+                <div class="bg-white p-4 min-h-[250px]">
+                    <h3 class="font-semibold text-lg mb-3 pb-2 border-b">1학기</h3>
+                    <div id="semester-4-1" class="course-list-container space-y-2">
+                        <!-- JS로 과목 카드 채워짐 -->
+                    </div>
+                </div>
+                <div class="bg-white p-4 min-h-[250px]">
+                    <h3 class="font-semibold text-lg mb-3 pb-2 border-b">2학기</h3>
+                    <div id="semester-4-2" class="course-list-container space-y-2">
+                        <!-- JS로 과목 카드 채워짐 -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
+    <script>
+        /**
+         * 가상 데이터 (Mock Data)
+         * 실제로는 이 데이터를 API 서버로부터 받아와야 합니다.
+         * 'common: true'는 선배 추천 공통 과목을 의미합니다.
+         */
+        const mockCourseData = {
+            'computer_science': [
+                { id: 'CS101', name: '컴퓨터 프로그래밍', year: 1, semester: 1, type: '전공필수', credits: 3, common: true },
+                { id: 'GE101', name: '글쓰기', year: 1, semester: 1, type: '교양필수', credits: 2, common: true },
+                { id: 'MA101', name: '미적분학', year: 1, semester: 1, type: '기초', credits: 3 },
+                { id: 'CS102', name: '자료구조', year: 1, semester: 2, type: '전공필수', credits: 3, common: true },
+                { id: 'PH101', name: '일반물리', year: 1, semester: 2, type: '기초', credits: 3 },
+                { id: 'GE102', name: '영어회화', year: 1, semester: 2, type: '교양필수', credits: 2 },
+                { id: 'CS201', name: '알고리즘', year: 2, semester: 1, type: '전공필수', credits: 3, common: true },
+                { id: 'CS202', name: '이산수학', year: 2, semester: 1, type: '전공선택', credits: 3, common: true },
+                { id: 'CS203', name: '객체지향프로그래밍', year: 2, semester: 2, type: '전공필수', credits: 3, common: true },
+                { id: 'CS204', name: '컴퓨터구조', year: 2, semester: 2, type: '전공필수', credits: 3 },
+                { id: 'CS301', name: '운영체제', year: 3, semester: 1, type: '전공필수', credits: 3, common: true },
+                { id: 'CS302', name: '데이터베이스', year: 3, semester: 1, type: '전공필수', credits: 3, common: true },
+                { id: 'CS303', name: '소프트웨어공학', year: 3, semester: 2, type: '전공선택', credits: 3 },
+                { id: 'CS304', name: '네트워크', year: 3, semester: 2, type: '전공필수', credits: 3, common: true },
+                { id: 'CS401', name: '인공지능', year: 4, semester: 1, type: '전공선택', credits: 3 },
+                { id: 'CS402', name: '캡스톤디자인', year: 4, semester: 1, type: '전공필수', credits: 3 },
+                { id: 'CS403', name: '컴퓨터비전', year: 4, semester: 2, type: '전공선택', credits: 3 },
+            ],
+            'business': [
+                { id: 'BU101', name: '경영학원론', year: 1, semester: 1, type: '전공필수', credits: 3, common: true },
+                { id: 'EC101', name: '경제학원론', year: 1, semester: 1, type: '기초', credits: 3, common: true },
+                { id: 'BU102', name: '회계원리', year: 1, semester: 2, type: '전공필수', credits: 3, common: true },
+                { id: 'ST101', name: '경영통계', year: 1, semester: 2, type: '기초', credits: 3 },
+                { id: 'BU201', name: '마케팅원론', year: 2, semester: 1, type: '전공필수', credits: 3, common: true },
+                { id: 'BU202', name: '재무관리', year: 2, semester: 2, type: '전공필수', credits: 3, common: true },
+                { id: 'BU301', name: '인사관리', year: 3, semester: 1, type: '전공필수', credits: 3, common: true },
+                { id: 'BU302', name: '생산관리', year: 3, semester: 2, type: '전공필수', credits: 3, common: true },
+                { id: 'BU401', name: '전략경영', year: 4, semester: 1, type: '전공필수', credits: 3 },
+            ],
+            'design': [
+                { id: 'DE101', name: '디자인기초', year: 1, semester: 1, type: '전공필수', credits: 3, common: true },
+                { id: 'DE102', name: '드로잉', year: 1, semester: 1, type: '전공필수', credits: 2, common: true },
+                { id: 'DE103', name: '디자인사', year: 1, semester: 2, type: '전공선택', credits: 3 },
+                { id: 'DE201', name: '타이포그래피', year: 2, semester: 1, type: '전공필수', credits: 3, common: true },
+                { id: 'DE202', name: 'UX/UI 디자인', year: 2, semester: 2, type: '전공필수', credits: 3, common: true },
+                { id: 'DE301', name: '브랜드디자인', year: 3, semester: 1, type: '전공필수', credits: 3, common: true },
+                { id: 'DE401', name: '포트폴리오', year: 4, semester: 2, type: '전공필수', credits: 3 },
+            ]
+        };
+
+        /**
+         * 과목 유형(type)에 따라 다른 색상의 뱃지를 반환합니다.
+         * @param {string} type - 과목 유형 (예: '전공필수', '교양필수')
+         * @returns {string} - Tailwind CSS 클래스가 포함된 HTML 문자열
+         */
+        function getTypeBadge(type) {
+            switch (type) {
+                case '전공필수':
+                    return `<span class="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">${type}</span>`;
+                case '전공선택':
+                    return `<span class="text-xs font-semibold px-2 py-0.5 bg-sky-100 text-sky-800 rounded-full">${type}</span>`;
+                case '교양필수':
+                    return `<span class="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-800 rounded-full">${type}</span>`;
+                case '기초':
+                    return `<span class="text-xs font-semibold px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">${type}</span>`;
+                default:
+                    return `<span class="text-xs font-semibold px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full">${type}</span>`;
+            }
+        }
+
+        /**
+         * 과목 카드 HTML을 생성합니다.
+         * @param {object} course - 과목 객체
+         * @returns {string} - 과목 카드 HTML 문자열
+         */
+        function createCourseCard(course) {
+            return `
+                <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-400 transition-all cursor-pointer">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-semibold text-gray-800">${course.name}</span>
+                        <span class="text-sm font-medium text-gray-600">${course.credits}학점</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        ${getTypeBadge(course.type)}
+                        <span class="text-gray-400">${course.id}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * 선배 추천 공통 과목 뱃지 HTML을 생성합니다.
+         * @param {object} course - 과목 객체
+         * @returns {string} - 뱃지 HTML 문자열
+         */
+        function createCommonCourseBadge(course) {
+            return `
+                <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full shadow-sm">
+                    ${course.name}
+                </span>
+            `;
+        }
+
+        /**
+         * 선택된 학과의 로드맵을 렌더링합니다.
+         * @param {string} department - 학과 키 (예: 'computer_science')
+         */
+        function renderRoadmap(department) {
+            const courses = mockCourseData[department] || [];
+            let totalCredits = 0;
+
+            // 1. 모든 학기 컨테이너 초기화
+            document.querySelectorAll('.course-list-container').forEach(container => {
+                container.innerHTML = '';
+            });
+
+            // 2. 과목을 알맞은 학기 컨테이너에 배치
+            courses.forEach(course => {
+                const targetContainer = document.getElementById(`semester-${course.year}-${course.semester}`);
+                if (targetContainer) {
+                    targetContainer.innerHTML += createCourseCard(course);
+                    totalCredits += course.credits;
+                }
+            });
+
+            // 3. 총 학점 업데이트
+            document.getElementById('total-credits').textContent = totalCredits;
+        }
+
+        /**
+         * 선택된 학과의 선배 추천 공통 과목을 렌더링합니다.
+         * @param {string} department - 학과 키
+         */
+        function renderCommonCourses(department) {
+            const courses = mockCourseData[department] || [];
+            const commonListContainer = document.getElementById('common-courses-list');
+
+            commonListContainer.innerHTML = ''; // 초기화
+
+            const commonCourses = courses.filter(course => course.common);
+
+            if (commonCourses.length === 0) {
+                commonListContainer.innerHTML = `<span class="text-gray-500">추천 과목 데이터가 없습니다.</span>`;
+                return;
+            }
+
+            commonCourses.forEach(course => {
+                commonListContainer.innerHTML += createCommonCourseBadge(course);
+            });
+        }
+
+        /**
+         * 입학년도 셀렉트 박스를 초기화합니다.
+         */
+        function initializeYearSelector() {
+            const yearSelect = document.getElementById('admission-year');
+            const currentYear = new Date().getFullYear();
+            for (let i = 0; i < 5; i++) {
+                const year = currentYear - i;
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = `${year}학년도`;
+                if (i === 0) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // --- 이벤트 리스너 설정 ---
+
+        // 페이지 로드 시
+        document.addEventListener('DOMContentLoaded', () => {
+            const departmentSelect = document.getElementById('department-select');
+
+            initializeYearSelector();
+
+            // 초기 로드
+            const initialDepartment = departmentSelect.value;
+            renderRoadmap(initialDepartment);
+            renderCommonCourses(initialDepartment);
+
+            // 학과 변경 시
+            departmentSelect.addEventListener('change', (e) => {
+                renderRoadmap(e.target.value);
+                renderCommonCourses(e.target.value);
+            });
+
+            // (참고) 입학년도 변경 시 로직 추가 가능
+            // document.getElementById('admission-year').addEventListener('change', (e) => {
+            //     alert(`${e.target.value}년도 데이터로 갱신합니다. (현재는 가상 데이터이므로 변경 없음)`);
+            //     // 실제로는 이 값과 학과 값을 조합하여 API를 호출해야 함
+            // });
+        });
+
+    </script>
 </body>
 </html>
