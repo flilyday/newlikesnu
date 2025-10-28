@@ -3,30 +3,1000 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>서울대 지식 이용 트렌드</title>
-    <!-- Tailwind CSS CDN -->
+    <title>AI 검색 오버뷰</title>
+    <!-- Tailwind CSS CDN 로드 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* These styles are copied from index.html to maintain consistency */
+        /* Inter 폰트 적용 (Tailwind의 기본 sans-serif에 포함) */
         body {
-            background-color: #f3f4f6; /* gray-100 */
-        }
-        .dark body {
-            background-color: #1f2937; /* gray-800 */
+            font-family: 'Inter', sans-serif;
         }
     </style>
-</head>
-<body class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300">
+    <!-- User's Sample CSS for Recommendation Modal -->
+    <style>
+      :root {
+        --primary: #12306b;
+        --primary-light: #234fa4;
+        --bg: #f5f7fa;
+        --text: #333;
+        --border: #e0e6ef;
+        --highlight: #e9f0ff;
+      }
 
-    <div class="container mx-auto p-4 md:p-8">
-        <main id="tab-content-container" class="bg-white dark:bg-gray-900/70 p-6 rounded-xl shadow-lg backdrop-blur-sm min-h-[200px]">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">📊 서울대 지식 이용 트렌드</h2>
-            <p class="text-gray-600 dark:text-gray-300">서울대 구성원들의 최근 검색어, 인기 논문, 자료 이용 현황 등을 분석하여 트렌드를 보여주는 화면입니다.</p>
-            <div class="mt-6 p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center">
-                <p class="text-gray-500 dark:text-gray-400">[트렌드 분석 대시보드가 표시될 영역]</p>
+      /* Scope the body style to the modal background */
+      .recommend-modal-body-style {
+        background: rgba(245, 247, 250, 0.9); /* Use var(--bg) with opacity */
+        font-family: "Apple SD Gothic Neo", sans-serif;
+        color: var(--text);
+      }
+
+      /* The user's container */
+      .recommend-modal-body-style .container {
+        max-width: 880px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 32px;
+        border-radius: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        max-height: 95vh; /* Make sure it fits */
+        overflow-y: auto; /* Allow scrolling */
+      }
+
+      /* --- All other styles from sample, prefixed with .recommend-modal-body-style --- */
+      /* This ensures they only apply inside Modal 3 */
+
+      .recommend-modal-body-style h2 {
+        color: var(--primary);
+        font-size: 22px;
+        margin-bottom: 20px;
+      }
+
+      .recommend-modal-body-style h3 {
+        font-size: 18px;
+        margin-top: 36px;
+        margin-bottom: 16px;
+      }
+
+      .recommend-modal-body-style .book-map {
+        display: flex;
+        justify-content: space-between;
+        text-align: center;
+        margin-bottom: 32px;
+        flex-wrap: wrap; /* Added for responsiveness */
+      }
+
+      .recommend-modal-body-style .book-map .item {
+        flex: 1;
+        min-width: 140px; /* Added for responsiveness */
+        padding: 0 10px;
+      }
+
+      .recommend-modal-body-style .book-map .item img {
+        height: 180px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .recommend-modal-body-style .book-map .arrow {
+        align-self: center;
+        font-size: 24px;
+        color: var(--primary);
+        padding: 0 16px;
+      }
+
+      .recommend-modal-body-style .caption {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #555;
+      }
+
+      .recommend-modal-body-style .book-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        justify-content: center; /* Center book cards */
+      }
+
+      .recommend-modal-body-style .book-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 140px;
+        padding: 12px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+        text-align: center;
+      }
+
+      .recommend-modal-body-style .subject-list {
+        display: flex;
+        gap: 16px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+
+      .recommend-modal-body-style .subject-item {
+        background: #fff;
+        border: 2px solid var(--primary);
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-weight: bold;
+        color: var(--primary);
+        text-align: center;
+        flex: 1 1 200px;
+      }
+
+      .recommend-modal-body-style .close-btn {
+        margin-top: 40px;
+        text-align: center;
+      }
+
+      .recommend-modal-body-style .close-btn a { /* This is for the original <a> */
+        display: inline-block;
+        background: var(--primary);
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+      }
+
+      .recommend-modal-body-style .close-btn button { /* This is for my new <button> */
+         display: inline-block;
+         background: var(--primary);
+         color: #fff;
+         padding: 12px 24px;
+         border-radius: 8px;
+         text-decoration: none;
+         border: none;
+         cursor: pointer;
+         font-weight: bold;
+      }
+
+      .recommend-modal-body-style .close-btn a:hover,
+      .recommend-modal-body-style .close-btn button:hover {
+        background: var(--primary-light);
+      }
+
+      .recommend-modal-body-style .book-card {
+        width: 160px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+      }
+
+      .recommend-modal-body-style .book-card:hover {
+        transform: translateY(-4px);
+      }
+
+      .recommend-modal-body-style .book-card img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+      }
+
+      .recommend-modal-body-style .book-card .info {
+        padding: 12px;
+      }
+
+      .recommend-modal-body-style .book-card .title {
+        font-size: 15px;
+        font-weight: bold;
+        color: var(--primary);
+        margin-bottom: 4px;
+      }
+
+      .recommend-modal-body-style .book-card .author {
+        font-size: 13px;
+        color: #666;
+      }
+
+      .recommend-modal-body-style .item {
+        width: 140px;
+        text-align: center;
+        position: relative;
+      }
+
+      .recommend-modal-body-style .label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #234fa4;
+        margin-bottom: 8px;
+      }
+
+      .recommend-modal-body-style .caption {
+        font-size: 14px;
+        margin-top: 10px;
+        line-height: 1.4;
+        color: #333;
+      }
+
+      .recommend-modal-body-style .arrow {
+        align-self: center;
+        font-size: 24px;
+        color: #888;
+      }
+
+      .recommend-modal-body-style .badge {
+        display: inline-block;
+        margin-top: 4px;
+        padding: 2px 8px;
+        font-size: 12px;
+        background: #007bff;
+        color: #fff;
+        border-radius: 6px;
+      }
+
+      .recommend-modal-body-style .book-title {
+        font-size: 14px;
+        font-weight: bold;
+        color: #12306b;
+        line-height: 1.3;
+        margin-bottom: 4px;
+        text-decoration: none;
+      }
+
+      .recommend-modal-body-style .book-author {
+        font-size: 13px;
+        color: #555;
+        margin-top: 0;
+        line-height: 1.2;
+      }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!--
+      화면 1: 검색 탭 (초기 화면)
+      ID: #screen-search
+    -->
+    <div id="screen-search" class="flex flex-col items-center p-4 pt-24">
+        <div class="w-full max-w-3xl text-center">
+
+            <!-- 헤더 -->
+            <header class="mb-8">
+                <h1 class="text-3xl font-bold text-indigo-900 mb-6">대전환 시대를 이끌어가는 학문공동체</h1>
+                <div class="flex justify-end items-center space-x-4 text-sm text-gray-700">
+                    <a href="#" class="flex items-center space-x-1 hover:underline">
+                        <!-- 고급검색 아이콘 (SVG) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 16v-2m0-8v-2m0 16V4m6 6v2m0-8v2m0 16v-2m-6-8v2m0-8v2m0 16v-2M6 12v2m0-8v2m0 16v-2m-6-8v2m0-8v2m0 16v-2m18-10h2m-16 0h2m8 0h2M4 12h2m-4 0h2m16 0h2m-8 0h2" />
+                        </svg>
+                        <span>고급검색</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-1 hover:underline">
+                        <!-- 도움말 아이콘 (SVG) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.79 4 4s-1.79 4-4 4-4-1.79-4-4c0-1.19.444-2.26 1.156-3.043l-1.128-1.128A6.002 6.002 0 006 13c0 3.314 2.686 6 6 6s6-2.686 6-6-2.686-6-6-6c-1.88 0-3.542.87-4.618 2.203L8.228 9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a.969.969 0 01-.969-.969V17.03c0-.534.435-.969.969-.969s.969.435.969.969v.001c0 .534-.435.969-.969.969z" />
+                        </svg>
+                        <span>도움말</span>
+                    </a>
+                </div>
+            </header>
+
+            <!-- 검색 키워드 -->
+            <div class="mb-4 flex justify-center space-x-2">
+                <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm" onclick="setSearchKeyword('물고기는 존재하지 않는다')">물고기는 존재하지 않는다</button>
+                <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm" onclick="setSearchKeyword('The Strength of Weak Ties')">The Strength of Weak Ties</button>
+            </div>
+
+            <!-- 검색창 -->
+            <div class="relative flex items-center w-full border-2 border-indigo-800 rounded-full shadow-lg h-16">
+                <div class="pl-6 pr-2">
+                    <span class="text-indigo-900 font-semibold">통합검색</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+                <input type="text" id="search-input" class="flex-grow h-full pl-4 text-lg bg-transparent focus:outline-none" placeholder="통합검색 검색어 입력">
+                <button id="search-button" class="h-full px-8 flex items-center justify-center text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!--
+      화면 2: 도서 검색결과
+      ID: #screen-result-book
+    -->
+    <div id="screen-result-book" class="hidden">
+        <!-- 검색결과 헤더 -->
+        <header class="bg-white shadow-sm p-4">
+            <div class="container mx-auto max-w-5xl">
+                <h2 class="text-2xl font-bold text-center mb-4">통합검색</h2>
+                <div class="flex justify-center space-x-4 text-indigo-700">
+                    <a href="#" class="font-semibold hover:underline" onclick="showScreen('screen-search')">통합화면으로 전환 &gt;</a>
+                    <a href="#" class="font-semibold hover:underline">LikeSNU로 전환 &gt;</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 키워드 바 -->
+        <div class="bg-indigo-900 text-white p-4">
+            <div class="container mx-auto max-w-5xl">
+                키워드 <span class="font-bold">'물고기는 존재하지 않는다'</span>(으)로 검색한 결과
+            </div>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="container mx-auto max-w-5xl p-4 mt-6">
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-xl font-bold mb-6 bg-blue-500 text-white p-2 rounded">검색 AI OverView</h3>
+
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- 책 표지 -->
+                    <div class="flex-shrink-0 w-full md:w-1/4">
+                        <img src="https://image.aladin.co.kr/product/28725/7/cover/e342539015_1.jpg"
+                             alt="물고기는 존재하지 않는다 책 표지"
+                             class="rounded-lg shadow-md w-full object-cover">
+                    </div>
+
+                    <!-- 책 정보 및 AI 요약 -->
+                    <div class="flex-grow">
+                        <h1 class="text-3xl font-bold mb-2">물고기는 존재하지 않는다</h1>
+                        <p class="text-gray-600 mb-2">룰루 밀러 저 / 정지인 역 · 2021년 12월</p>
+                        <p class="text-sm text-indigo-700 font-semibold mb-4">최근 대출 횟수: 35회</p>
+
+                        <p class="text-gray-800 leading-relaxed mb-6">
+                            '방송계의 퓰리처상'으로 불리는 피버디상(Peabody Awards)을 수상한 과학 전문기자 룰루 밀러의 경이로운 논픽션. &lt;물고기는 존재하지 않는다&gt;는 여러 언론 매체에서 '2020년 최고의 책'으로 선정한 만큼 수많은 찬사를 받은 화제의 베스트셀러이다. 집착에 가까울 만큼 자연계에 질서를 부여하려 했던 19세기 어느 과학자의 삶을 흥미롭게 좇아가는 이 책은 어느 순간 독자들을 혼돈의 한복판으로 데려가서 우리가 믿고 있던 삶의 질서에 관해 한 가지 의문을 제기한다. "물고기가 존재하지 않는다는 것은 엄연한 하나의 사실이다. 그렇다면 우리는 또 무엇을 잘못 알고 있을까?" 하고 말이다.
+                        </p>
+
+                        <div class="flex flex-wrap gap-3">
+                            <a href="https://snu-primo.hosted.exlibrisgroup.com/permalink/f/1l6eo7m/82SNU_INST21839324480002591" target="_blank" class="inline-block bg-blue-700 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-800 transition-colors">소장정보 보기</a>
+                            <a href="http://147.46.181.235/Mobile/BOOK/book_location_info.php?call_num=597.092+J762m+2021&title=%EB%AC%BC%EA%B3%A0%EA%B8%B0%EB%8A%94+%EC%A1%B4%EC%9E%AC%ED%95%98%EC%A7%80+%EC%95%8A%EB%8A%94%EB%8B%A4+%3A+%EC%83%81%EC%8B%A4%2C+%EC%82%AC%EB%9E%91+%EA%B7%B8%EB%A6%AC%EA%B3%A0+%EC%88%A8%EC%96%B4+%EC%9E%88%EB%8A%94+%EC%82%A6%EC%9D%98+%EC%A7%88%EC%84%9C%EC%97%90+%EA%B4%80%ED%95%9C+%EC%9D%B4%EC%95%BC%EA%B8%B0+%2F" target="_blank" class="inline-block bg-gray-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-gray-700 transition-colors">위치 보기</a>
+                            <button class="bg-green-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-green-700 transition-colors">LikeSNU로 깊이 읽기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 대출 정보 -->
+            <div class="bg-white rounded-lg shadow-lg p-4 mt-6 flex justify-between items-center">
+                <p class="text-gray-700">
+                    이 책은 <span class="font-bold text-red-600">대출중</span>입니다. 앞에 대기자가 <span class="font-bold">5명</span> 있어요. 지금 예약하면 예상 대출일: <span class="font-bold">2025년 6월 25일(수)</span>
+                </p>
+                <button id="one-click-reserve-button" class="bg-indigo-800 text-white px-6 py-2 rounded-md font-semibold hover:bg-indigo-900 transition-colors">원클릭 예약</button>
+            </div>
+
+            <!-- 샘플 검색 결과 섹션 -->
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 왼쪽 컬럼 -->
+                <div class="space-y-8">
+                    <!-- 단행본·전자책 -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold">단행본·전자책</h4>
+                            <a href="#" class="text-sm text-gray-600 hover:underline">전체보기 &gt;</a>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- 아이템 1 -->
+                            <div class="flex gap-4">
+                                <img src="https://placehold.co/64x80/E0E0E0/505050?text=Book" alt="책 표지" class="flex-shrink-0 w-16 h-20 rounded object-cover bg-gray-200">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">단행본</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">물고기는 존재하지 않는다 : 상실, 사랑 그리고 숨어 있는 삶의 질서에 관한 이야기</a>
+                                    <p class="text-sm text-gray-600">Miller, Lulu, 1983-</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">소장정보 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 아이템 2 -->
+                            <div class="flex gap-4">
+                                <img src="https://placehold.co/64x80/E0E0E0/505050?text=eBook" alt="책 표지" class="flex-shrink-0 w-16 h-20 rounded object-cover bg-gray-200">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">전자자료</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">물고기는 존재하지 않는다 [전자자료] : 상실, 사랑 그리고 숨어 있는 삶의 질서에 관한 이야기</a>
+                                    <p class="text-sm text-gray-600">Miller, Lulu, 1983-</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">온라인 이용 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 아이템 3 -->
+                            <div class="flex gap-4">
+                                <img src="https://placehold.co/64x80/E0E0E0/505050?text=Book" alt="책 표지" class="flex-shrink-0 w-16 h-20 rounded object-cover bg-gray-200">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">단행본</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">대출중</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">물고기는 존재하지 않는다</a>
+                                    <p class="text-sm text-gray-600">룰루 밀러</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">온라인 이용 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center items-center mt-4 text-sm text-gray-500 space-x-4">
+                            <span>이전</span>
+                            <span class="font-bold text-gray-900">1</span>
+                            <span>다음</span>
+                        </div>
+                    </div>
+
+                    <!-- LikeSNU -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold">LikeSNU</h4>
+                            <a href="#" class="text-sm text-gray-600 hover:underline">전체보기 &gt;</a>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- LikeSNU 아이템 -->
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-16 h-20 rounded bg-gray-200 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18c-2.305 0-4.408.867-6 2.292m0-14.25v14.25" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">물고기는 존재하지 않는다</a>
+                                    <p class="text-sm text-gray-600">도서자료</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 오른쪽 컬럼 -->
+                <div class="space-y-8">
+                    <!-- 학술논문·학위논문 -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold">학술논문·학위논문</h4>
+                            <a href="#" class="text-sm text-gray-600 hover:underline">전체보기 &gt;</a>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- 아이템 1 -->
+                            <div class="flex gap-4">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">학술논문</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">「왜... 한(恨)을 품는가?: 「물고기는 존재하지 않는다」</a>
+                                    <p class="text-sm text-gray-600">문예마당, 2022</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">온라인 이용 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 아이템 2 -->
+                            <div class="flex gap-4">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">학술논문</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">왜 어항 물고기인가? : 「물고기는 존재하지 않는다」 룰루 밀러(2021), 긍휼한</a>
+                                    <p class="text-sm text-gray-600">기독교사상, 2022</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">온라인 이용 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 아이템 3 -->
+                            <div class="flex gap-4">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">학술논문</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">아메코모보의 '수중도시'에 나타난 변신과 시간</a>
+                                    <p class="text-sm text-gray-600">일본학보, 2001</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">온라인 이용 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center items-center mt-4 text-sm text-gray-500 space-x-4">
+                            <span>이전</span>
+                            <span class="font-bold text-gray-900">1</span>
+                            <span>다음</span>
+                        </div>
+                    </div>
+
+                    <!-- 저널·학술 DB -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold">저널·학술 DB</h4>
+                            <a href="#" class="text-sm text-gray-600 hover:underline">전체보기 &gt;</a>
+                        </div>
+                        <div class="space-y-4">
+                            <p class="text-gray-500">결과가 없습니다.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
+
+    <!--
+      화면 3: 논문 검색결과
+      ID: #screen-result-paper
+    -->
+    <div id="screen-result-paper" class="hidden">
+        <!-- 검색결과 헤더 -->
+        <header class="bg-white shadow-sm p-4">
+            <div class="container mx-auto max-w-5xl">
+                <h2 class="text-2xl font-bold text-center mb-4">통합검색</h2>
+                <div class="flex justify-center space-x-4 text-indigo-700">
+                    <a href="#" class="font-semibold hover:underline" onclick="showScreen('screen-search')">통합화면으로 전환 &gt;</a>
+                    <a href="#" class="font-semibold hover:underline">LikeSNU로 전환 &gt;</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 키워드 바 -->
+        <div class="bg-indigo-900 text-white p-4">
+            <div class="container mx-auto max-w-5xl">
+                키워드 <span class="font-bold">'The Strength of Weak Ties'</span>(으)로 검색한 결과
+            </div>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="container mx-auto max-w-5xl p-4 mt-6">
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-xl font-bold mb-6 bg-blue-500 text-white p-2 rounded">검색 AI OverView</h3>
+
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">The Strength of Weak Ties</h1>
+                    <p class="text-gray-600 mb-2">Mark S. Granovetter · American Journal of Sociology · Vol. 78, No. 6 · May 1973 · pp. 1360-1380 (21 pages)</p>
+                    <p class="text-sm text-gray-500 mb-4">
+                        Journal Article | SSCI 등재 | 사회학 &gt; 사회 네트워크 이론
+                    </p>
+
+                    <p class="text-gray-800 leading-relaxed mb-6">
+                        이 논문은 사회 네트워크 이론에서 고전으로 꼽히며, "<span class="font-semibold text-indigo-700">약한 연결(weak ties)</span>"이 정보 확산과 <span class="font-semibold text-indigo-700">사회적 기회(예: 취업, 혁신)</span>에서 중요한 역할을 한다는 이론을 제시합니다. 기존에는 '가깝고 강한 관계'가 중요하다고 생각했지만, 이 논문은 멀고 느슨한 관계가 오히려 더 많은 정보와 기회를 제공한다는 점을 실증적으로 보여줍니다.
+                    </p>
+
+                    <div class="flex flex-wrap gap-3">
+                        <a href="../assets/Granovetter-StrengthWeakTies-1973.pdf" download="Granovetter-StrengthWeakTies-1973.pdf"><button class="bg-blue-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors">원문 다운로드</button></a>
+                        <button class="bg-green-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-green-700 transition-colors">LikeSNU로 깊이 읽기</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 샘플 검색 결과 섹션 -->
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 왼쪽 컬럼 -->
+                <div class="space-y-8">
+                    <!-- 단행본·전자책 -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold">단행본·전자책</h4>
+                            <a href="#" class="text-sm text-gray-600 hover:underline">전체보기 &gt;</a>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- 아이템 1 -->
+                            <div class="flex gap-4">
+                                <div class="flex-shrink-0 w-16 h-20 rounded bg-gray-200 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18c-2.305 0-4.408.867-6 2.292m0-14.25v14.25" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">전자책</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">Twitter: the strength of weak ties, by Amardeep V</a>
+                                    <p class="text-sm text-gray-600">Virk, p 19-21</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">온라인 이용 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 아이템 2 -->
+                            <div class="flex gap-4">
+                                <img src="https://placehold.co/64x80/E0E0E0/505050?text=Book" alt="책 표지" class="flex-shrink-0 w-16 h-20 rounded object-cover bg-gray-200">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">전자책</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">Why Context Matters: Applications of Social Network Analysis</a>
+                                    <p class="text-sm text-gray-600">Friemel, Thomas</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">온라인 이용 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 아이템 3 -->
+                            <div class="flex gap-4">
+                                <img src="https://placehold.co/64x80/E0E0E0/505050?text=Book" alt="책 표지" class="flex-shrink-0 w-16 h-20 rounded object-cover bg-gray-200">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">전자책</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">Super weak ties : what culturally holds our society together</a>
+                                    <p class="text-sm text-gray-600">Smith-Peter, Christian</Virk, p 19-21</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">온라인 이용 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center items-center mt-4 text-sm text-gray-500 space-x-4">
+                            <span>이전</span>
+                            <span class="font-bold text-gray-900">1</span>
+                            <span>다음</span>
+                        </div>
+                    </div>
+
+                    <!-- LikeSNU -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold">LikeSNU</h4>
+                            <a href="#" class="text-sm text-gray-600 hover:underline">전체보기 &gt;</a>
+                        </div>
+                        <div class="space-y-4">
+                            <p class="text-gray-500">결과가 없습니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 오른쪽 컬럼 -->
+                <div class="space-y-8">
+                    <!-- 학술논문·학위논문 -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold">학술논문·학위논문</h4>
+                            <a href="#" class="text-sm text-gray-600 hover:underline">전체보기 &gt;</a>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- 아이템 1 -->
+                            <div class="flex gap-4">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">학술논문</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">The "Dark Side" of the Strength of Weak Ties: The Diffusion of Suicidal Thoughts</a>
+                                    <p class="text-sm text-gray-600">Baller, Robert D.; Richardson, Kelly K.</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">원문 바로이용 &gt;</a>
+                                        <a href="#" class="hover:underline">저널 목차보기 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                             <!-- 아이템 2 -->
+                             <div class="flex gap-4">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">학술논문</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">The 'strength of weak ties' among female baboons: fitness-related benefits of social bonds</a>
+                                    <p class="text-sm text-gray-600">McFarland, Richard ; Murphy, Derek ; Lusseau, David ; Henzi, S. Peter...</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">원문 바로이용 &gt;</a>
+                                        <a href="#" class="hover:underline">저널 목차보기 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 아이템 3 -->
+                             <div class="flex gap-4">
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">학술논문</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">이용가능</span>
+                                    </div>
+                                    <a href="#" class="font-semibold text-gray-900 hover:underline">The Strength-of-Weak-Ties Perspective on Creativity: A Comprehensive Examination and Extension</a>
+                                    <p class="text-sm text-gray-600">Egly, Man-pui</p>
+                                    <div class="flex gap-3 text-sm text-blue-600 mt-1">
+                                        <a href="#" class="hover:underline">원문 바로이용 &gt;</a>
+                                        <a href="#" class="hover:underline">저널 목차보기 &gt;</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center items-center mt-4 text-sm text-gray-500 space-x-4">
+                            <span>이전</span>
+                            <span class="font-bold text-gray-900">1</span>
+                            <span>다음</span>
+                        </div>
+                    </div>
+
+                    <!-- 저널·학술 DB -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold">저널·학술 DB</h4>
+                            <a href="#" class="text-sm text-gray-600 hover:underline">전체보기 &gt;</a>
+                        </div>
+                        <div class="space-y-4">
+                            <p class="text-gray-500">결과가 없습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 transition-opacity duration-200"></div>
+
+    <!-- Modal 1: 예약 확인 -->
+    <div id="reserve-modal-1" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 p-6 transition-all duration-200 w-full max-w-sm">
+        <h3 class="text-lg font-semibold mb-4">snulibdev.snu.ac.kr 내용:</h3>
+        <p class="mb-6 text-blue-600 font-semibold">■ 예약하시겠습니까?</p>
+        <div class="flex justify-end space-x-3">
+            <button id="reserve-cancel-1" class="px-5 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 font-medium">취소</button>
+            <button id="reserve-confirm-1" class="px-5 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 font-medium">확인</button>
+        </div>
+    </div>
+
+    <!-- Modal 2: 예약 완료 -->
+    <div id="reserve-modal-2" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-50 p-6 transition-all duration-200 w-full max-w-md">
+        <h3 class="text-lg font-semibold mb-4">snulibdev.snu.ac.kr 내용:</h3>
+        <p class="mb-2 font-medium">예약이 완료되었습니다.</p>
+        <p class="mb-6">📗 책을 기다리는 동안 &lt;물고기는 존재하지 않는다&gt;를 읽기 전에 미리 보면 좋을 책을 추천 받으시겠습니까?</p>
+        <div class="flex justify-end space-x-3">
+            <button id="reserve-cancel-2" class="px-5 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 font-medium">취소</button>
+            <button id="reserve-confirm-2" class="px-5 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 font-medium">확인</button>
+        </div>
+    </div>
+
+    <!-- Modal 3: 추천 도서 (from sample) -->
+    <div id="recommend-modal" class="hidden fixed inset-0 z-50 p-4 md:p-8 flex items-center justify-center recommend-modal-body-style transition-opacity duration-200">
+        <!-- Content copied from user's sample <body> -->
+        <div class="container">
+          <h2>📚 추천 도서 안내</h2>
+
+          <!-- 도서지도 -->
+          <h3>서울대 지식 지도</h3>
+          <div class="book-map">
+            <div class="item">
+              <div class="label">이전에 가장 많이 읽은 책</div>
+              <img src="https://image.aladin.co.kr/product/36101/66/cover500/893643974x_2.jpg" alt="혼모노">
+              <div class="caption"><strong>『혼모노』</strong><br>성해나</div>
+              <div class="badge">23회</div>
+            </div>
+
+            <div class="arrow">➡</div>
+
+            <div class="item">
+              <div class="label">예약한 책</div>
+              <img src="https://image.aladin.co.kr/product/28725/7/cover/e342539015_1.jpg" alt="물고기는 존재하지 않는다">
+              <div class="caption"><strong>『물고기는 존재하지 않는다』</strong><br>룰루 밀러</div>
+            </div>
+
+            <div class="arrow">➡</div>
+
+            <div class="item">
+              <div class="label">이후에 가장 많이 읽은 책</div>
+              <img src="https://image.aladin.co.kr/product/1960/91/cover500/8937485621_1.jpg" alt="잃어버린 시간을 찾아서">
+              <div class="caption"><strong>『잃어버린 시간을 찾아서』</strong><br>미셸 프로스트</div>
+              <div class="badge">35회</div>
+            </div>
+          </div>
+
+          <!-- 함께 본 책 -->
+          <h3>이 책을 본 사람들이 함께 봤던 책</h3>
+          <div class="book-list">
+            <div class="book-card">
+              <a href="#" target="_blank">
+                <img src="https://image.aladin.co.kr/product/19651/75/cover500/ek49263539_1.jpg" alt="숨 : 익스할레이션">
+                <div class="info">
+                  <div class="book-title">숨 : 익스할레이션</div>
+                  <div class="book-author">테드 창</div>
+                </div>
+              </a>
+            </div>
+            <div class="book-card">
+              <a href="#" target="_blank">
+                <img src="https://image.aladin.co.kr/product/33811/91/cover500/e122533076_1.jpg" alt="여행의 이유">
+                <div class="info">
+                  <div class="book-title">여행의 이유</div>
+                  <div class="book-author">김영하</div>
+                </div>
+              </a>
+            </div>
+            <div class="book-card">
+              <a href="#" target="_blank">
+                <img src="https://image.aladin.co.kr/product/35399/92/cover500/e252534036_1.jpg" alt="비로 쓴 편지">
+                <div class="info">
+                  <div class="book-title">비로 쓴 편지</div>
+                  <div class="book-author">법정과 카뮈</div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- 유사한 책 -->
+          <h3>이 책과 유사한 책</h3>
+          <div class="book-list">
+            <div class="book-card">
+              <a href="#" target="_blank">
+                <img src="https://image.aladin.co.kr/product/18009/94/cover500/ek86253413_1.jpg" alt="철학은 어떻게 삶의 무기가 되는가">
+                <div class="info">
+                  <div class="book-title">철학은 어떻게 삶의 무기가 되는가</div>
+                  <div class="book-author">야마구치 슈</div>
+                </div>
+              </a>
+            </div>
+            <div class="book-card">
+              <a href="#" target="_blank">
+                <img src="https://image.aladin.co.kr/product/9176/49/cover500/e782430660_1.jpg" alt="세상의 모든 지식">
+                <div class="info">
+                  <div class="book-title">세상의 모든 지식 : 미네르바의 부엉이</div>
+                  <div class="book-author">김태유</div>
+                </div>
+              </a>
+            </div>
+            <div class="book-card">
+              <a href="#" target="_blank">
+                <img src="https://image.aladin.co.kr/product/15263/21/cover500/e897381472_1.jpg" alt="멋진 신세계">
+                <div class="info">
+                  <div class="book-title">멋진 신세계</div>
+                  <div class="book-author">올더스 헉슬리</div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- 수업 활용 -->
+          <h3>이 책이 쓰이는 수업</h3>
+          <div class="subject-list">
+            <div class="subject-item">생물학 개론<br><small>전필</small></div>
+            <div class="subject-item">철학의 이해<br><small>교양</small></div>
+          </div>
+
+          <div class="close-btn">
+            <button id="recommend-close-btn">창 닫기</button>
+          </div>
+        </div>
+    </div>
+
+
+    <!-- JavaScript 로직 -->
+    <script>
+        // 모든 화면 요소를 가져옵니다.
+        const screens = {
+            'screen-search': document.getElementById('screen-search'),
+            'screen-result-book': document.getElementById('screen-result-book'),
+            'screen-result-paper': document.getElementById('screen-result-paper')
+        };
+
+        // 특정 화면을 보여주는 함수
+        function showScreen(screenId) {
+            // 모든 화면을 숨깁니다.
+            for (const id in screens) {
+                screens[id].classList.add('hidden');
+            }
+            // 요청된 화면만 보여줍니다.
+            if (screens[screenId]) {
+                screens[screenId].classList.remove('hidden');
+            }
+            // 페이지 상단으로 스크롤합니다.
+            window.scrollTo(0, 0);
+        }
+
+        // --- Modal Logic ---
+        const modalOverlay = document.getElementById('modal-overlay');
+        const reserveModal1 = document.getElementById('reserve-modal-1');
+        const reserveModal2 = document.getElementById('reserve-modal-2');
+        const recommendModal = document.getElementById('recommend-modal');
+
+        const oneClickReserveButton = document.getElementById('one-click-reserve-button');
+
+        const reserveConfirm1 = document.getElementById('reserve-confirm-1');
+        const reserveCancel1 = document.getElementById('reserve-cancel-1');
+
+        const reserveConfirm2 = document.getElementById('reserve-confirm-2');
+        const reserveCancel2 = document.getElementById('reserve-cancel-2');
+
+        const recommendCloseBtn = document.getElementById('recommend-close-btn');
+
+        function openModal(modal) {
+            if (modalOverlay) modalOverlay.classList.remove('hidden');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeAllModals() {
+            if (modalOverlay) modalOverlay.classList.add('hidden');
+            if (reserveModal1) reserveModal1.classList.add('hidden');
+            if (reserveModal2) reserveModal2.classList.add('hidden');
+            if (recommendModal) recommendModal.classList.add('hidden');
+        }
+
+        // Step 1: Click "원클릭 예약"
+        if (oneClickReserveButton) {
+            oneClickReserveButton.addEventListener('click', () => {
+                openModal(reserveModal1);
+            });
+        }
+
+        // Step 2: Click "확인" on Modal 1
+        if (reserveConfirm1) {
+            reserveConfirm1.addEventListener('click', () => {
+                reserveModal1.classList.add('hidden'); // Close current modal
+                openModal(reserveModal2); // Open modal 2
+            });
+        }
+
+        // Step 3: Click "확인" on Modal 2
+        if (reserveConfirm2) {
+            reserveConfirm2.addEventListener('click', () => {
+                reserveModal2.classList.add('hidden'); // Close current modal
+                openModal(recommendModal); // Open modal 3
+            });
+        }
+
+        // Close/Cancel buttons
+        if (reserveCancel1) {
+            reserveCancel1.addEventListener('click', closeAllModals);
+        }
+        if (reserveCancel2) {
+            reserveCancel2.addEventListener('click', closeAllModals);
+        }
+        if (recommendCloseBtn) {
+            recommendCloseBtn.addEventListener('click', closeAllModals);
+        }
+        if (modalOverlay) {
+            // Optional: Click overlay to close (but recommend modal is full screen)
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeAllModals();
+                }
+            });
+        }
+
+        // 검색 버튼 및 입력 필드 이벤트 리스너 설정
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+
+            if (query === '물고기는 존재하지 않는다') {
+                showScreen('screen-result-book');
+            } else if (query === 'The Strength of Weak Ties') {
+                showScreen('screen-result-paper');
+            } else {
+                // 이 예제에서는 두 가지 특정 케이스만 처리합니다.
+                // 일치하는 항목이 없으면 아무것도 하지 않거나,
+                // 기본 검색 결과 페이지(여기서는 없음)를 보여줄 수 있습니다.
+                if (query) {
+                    alert('"' + query + '"에 대한 검색 결과가 없습니다.\n\n"물고기는 존재하지 않는다" 또는 "The Strength of Weak Ties"를(를) 입력해 보세요.');
+                }
+            }
+        }
+
+        function setSearchKeyword(keyword) {
+            searchInput.value = keyword;
+            performSearch();
+        }
+
+        // 검색 버튼 클릭 시
+        searchButton.addEventListener('click', performSearch);
+
+        // Enter 키 입력 시
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // 초기 화면 설정 (검색 탭)
+        // (HTML에서 이미 #screen-search만 보이도록 설정되어 있음)
+    </script>
 
 </body>
 </html>

@@ -16,9 +16,12 @@ async def favicon():
 
 async def get_books():
     async with httpx.AsyncClient() as client:
-        response = await client.get("http://likesnuapi.snu.ac.kr:9797/recommend/B111675/book?cnt=20")
+        response = await client.get("http://likesnuapi.snu.ac.kr:9797/recommend/B111675/book?cnt=30")
         if response.status_code == 200:
-            return response.json()
+            books = response.json()
+            # thumb_url이 /image로 시작하는 항목 필터링
+            filtered_books = [book for book in books if not book.get('thumb_url', '').startswith('/image')]
+            return filtered_books
         return None
 
 @app.get("/", response_class=HTMLResponse)
@@ -29,6 +32,9 @@ async def read_root(request: Request):
 @app.get("/{filename}", response_class=HTMLResponse)
 async def read_item(request: Request, filename: str):
     if filename == "1.knowledge-books.html":
+        books = await get_books()
+        return templates.TemplateResponse(filename, {"request": request, "books": books})
+    if filename == "4.knowledge-empty-class.html":
         books = await get_books()
         return templates.TemplateResponse(filename, {"request": request, "books": books})
     return templates.TemplateResponse(filename, {"request": request})

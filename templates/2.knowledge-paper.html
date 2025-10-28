@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>논문 포스트잇</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js V3 --><script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         /* 아코디언 UI를 위한 스타일 */
         .accordion-content {
@@ -20,20 +21,163 @@
             -ms-overflow-style: none;  /* IE and Edge */
             scrollbar-width: none;  /* Firefox */
         }
+        /* 입체적인 포스트잇 효과 */
+        .post-it-card {
+            position: relative;
+            transform: rotate(var(--rotation, 0deg));
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            /* 포스트잇에 내용이 더 들어갈 수 있도록 높이 자동 조절 */
+            min-height: 16rem; /* 최소 높이 (aspect-square 대신) */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .post-it-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            width: 90%; /* 그림자 크기 조정 */
+            height: 90%; /* 그림자 크기 조정 */
+            background: rgba(0, 0, 0, 0.1);
+            transform: rotate(5deg) translate(5px, 5px); /* 그림자 위치 및 회전 */
+            filter: blur(5px); /* 그림자 부드럽게 */
+            z-index: -1;
+            transition: transform 0.2s ease-in-out;
+        }
+        .post-it-card:hover {
+            transform: rotate(var(--hover-rotation, 0deg)) scale(1.02);
+        }
+        .post-it-card:hover::after {
+            transform: rotate(8deg) translate(8px, 8px) scale(1.02);
+        }
+
+        /* Alpine.js 숨김 처리 */
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
 
-    <div class="max-w-7xl mx-auto">
-        <!-- 기존 UI 섹션 (상단) -->
-        <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">📝 논문 포스트 잇</h2>
+    <!-- ▼▼▼ Alpine.js 데이터 컨테이너 시작 ▼▼▼ --><div
+        class="max-w-7xl mx-auto"
+        x-data="{
+            globalPapers: [],
+            domesticPapers: [],
+            postItNotes: [], // 초기에는 빈 배열로 설정
+            selectedPaper: null,
+
+            init() {
+                // 글로벌 BEST 논문 데이터 (요약 추가)
+                this.globalPapers = [
+                    {
+                        title: 'MZ세대의 자기애성향, SNS 이용동기, 과시적 여가소비의 관계',
+                        summary: '본 연구는 MZ세대의 자기애성향이 SNS 이용동기(정보추구, 관계유지, 자기표현)와 과시적 여가소비에 미치는 영향을 분석했습니다. 자기표현 동기가 과시적 여가소비에 가장 큰 영향을 미치는 것으로 나타났습니다.',
+                        author: '김영미', journal: '관광학연구', year: '2023'
+                    },
+                    {
+                        title: '한류 소재 OTT 콘텐츠의 스케이프와 문화적 표상: <케이팝 데몬 헌터스>, <엑스오, 키티>를 중심...',
+                        summary: '본 연구는 넷플릭스 오리지널 콘텐츠 <케이팝 데몬 헌터스>와 <엑스오, 키티>에 나타난 한류 소재의 문화적 표상 및 미디어 스케이프를 분석합니다. 글로벌 시청자를 대상으로 한 문화 혼종성과 재현의 정치를 고찰합니다.',
+                        author: '이수진', journal: '미디어와 문화', year: '2024'
+                    },
+                    {
+                        title: 'AI(인공지능)는 과연 위대한 예술가인가?',
+                        summary: '생성형 AI의 예술 창작 능력을 발터 벤야민의 \'아우라\' 개념을 중심으로 비평적으로 고찰합니다. 기술적 복제 시대의 예술 작품이 갖는 의미와 AI 창작물의 독창성 및 예술적 지위를 탐구합니다.',
+                        author: '박철수', journal: '미학예술학연구', year: '2023'
+                    },
+                    {
+                        title: '정동의 정치와 예술 : 뱅크시(Banksy) 그라피티 분석',
+                        summary: '거리 예술가 뱅크시의 작품에 나타난 정동(affect)의 요소를 분석하고, 이것이 어떻게 대중의 감정을 자극하여 사회적, 정치적 메시지를 전달하는지 탐구합니다. 저항의 예술로서 그라피티의 역할을 재조명합니다.',
+                        author: '최보라', journal: '현대미술사연구', year: '2024'
+                    },
+                    {
+                        title: '생성형 AI와 제품 디자이너의 디자인 아이디에이션 비교 연구 : 창의성, 혁신성, 공감 능력을 중심으로',
+                        summary: '본 연구는 생성형 AI(Midjourney, DALL-E)와 전문 제품 디자이너가 동일한 주제로 아이디어를 도출하는 과정을 비교 분석합니다. 창의성, 혁신성, 공감 능력의 측면에서 AI와 인간 디자이너의 강점과 약점을 고찰합니다.',
+                        author: '정디자인', journal: '디자인학연구', year: '2023'
+                    }
+                ];
+
+                // 국내 BEST 논문 데이터 (요약 추가)
+                this.domesticPapers = [
+                    {
+                        title: '부끄러움/창피함/쑥스러움/수줍음의 관계 고찰',
+                        summary: '한국어의 유의어 \'부끄러움\', \'창피함\', \'쑥스러움\', \'수줍음\'의 의미 자질과 화용론적 차이를 비교 분석합니다. 실제 발화 맥락에서 각 어휘가 어떻게 선택적으로 사용되는지 고찰합니다.',
+                        author: '김아람(Kim, Ahrim)', journal: '한국언어학회', year: '2018'
+                    },
+                    {
+                        title: '카카오톡 환경에서의 의사소통 방식 고찰',
+                        summary: '모바일 메신저 카카오톡 환경에서 나타나는 언어적, 비언어적 의사소통 방식의 변화를 탐구합니다. 이모티콘 사용, 줄임말, 대화 단절 및 재시작 패턴을 중심으로 분석합니다.',
+                        author: '심주희(Sim, Juhui)', journal: '한국언어학회', year: '2021'
+                    },
+                    {
+                        title: '영어와 한국어 언어 유머 비교 분석',
+                        summary: '영어와 한국어의 언어 유머 발생 기제를 대조 분석합니다. 각 문화권에서 선호되는 유머의 유형과 언어적 구조(중의성, 아이러니 등)의 차이점을 고찰합니다.',
+                        author: '윤성은', journal: '이화여자대학교 영어영문학연구소', year: '2000'
+                    },
+                    {
+                        title: 'AI 디지털교과서 도입의 기대와 우려: AI 및 디지털 도구 활용 실태 조사를 기반으로',
+                        summary: 'AI 디지털교과서 도입을 앞두고 교사 및 학생들의 디지털 도구 활용 실태를 조사합니다. 이를 바탕으로 AI 기반 교육의 기대 효과와 윤리적, 기술적 우려 사항을 함께 논의합니다.',
+                        author: '윤선주', journal: '한국현대언어학회', year: '2024'
+                    },
+                    {
+                        title: '『來人之文十五』 소재 報謁의 漢譯에 대하여',
+                        summary: '조선 시대 일본 사신 접대 기록인 『내인지문십오』에 나타난 \'보알(報謁)\'의 용례를 분석하고, 당시의 한역(漢譯) 과정에서 발생한 의미의 변용과 외교적 맥락을 고찰합니다.',
+                        author: '이희영(Lee Hee-young)', journal: '우리어문학회', year: '2025'
+                    },
+                    {
+                        title: '아동의 언어발달 단계에 관한 심리학적 연구',
+                        summary: '피아제(Piaget)와 비고츠키(Vygotsky)의 인지 발달 이론을 바탕으로 아동의 언어 습득 및 발달 단계를 심리학적 관점에서 고찰합니다. 언어와 사고의 상호작용을 중심으로 분석합니다.',
+                        author: '조영현', journal: '서울사범학교육문제연구소', year: '1975'
+                    }
+                ];
+
+                // postItNotes는 이제 초기에는 빈 배열로 시작합니다.
+                this.postItNotes = [];
+            },
+
+            // 포스트잇 추가 함수
+            addPostIt(paper) {
+                // 중복 방지: 이미 추가된 논문인지 확인
+                if (paper && !this.postItNotes.find(note => note.title === paper.title)) {
+                    // 새 노트를 배열 맨 앞에 추가
+                    this.postItNotes.unshift(paper);
+                }
+                this.selectedPaper = null; // 모달 닫기
+            },
+
+            // 포스트잇 스타일링 함수
+            getPostItClass(index) {
+                const colors = [
+                    'bg-yellow-100 dark:bg-yellow-800/40 border-yellow-200 dark:border-yellow-700',
+                    'bg-green-100 dark:bg-green-800/40 border-green-200 dark:border-green-700',
+                    'bg-blue-100 dark:bg-blue-800/40 border-blue-200 dark:border-blue-700',
+                    'bg-pink-100 dark:bg-pink-800/40 border-pink-200 dark:border-pink-700',
+                    'bg-orange-100 dark:bg-orange-800/40 border-orange-200 dark:border-orange-700',
+                    'bg-purple-100 dark:bg-purple-800/40 border-purple-200 dark:border-purple-700',
+                    'bg-teal-100 dark:bg-teal-800/40 border-teal-200 dark:border-teal-700',
+                    'bg-indigo-100 dark:bg-indigo-800/40 border-indigo-200 dark:border-indigo-700',
+                    'bg-gray-100 dark:bg-gray-700/40 border-gray-200 dark:border-gray-600'
+                ];
+                return `post-it-card p-5 rounded-lg ${colors[index % colors.length]}`;
+            },
+
+            getPostItStyle(index) {
+                const rotations = [-2, 1, -3, 2, -1, 3, -2.5, 0.5, 1.5];
+                const hoverRotations = [-4, 3, -5, 4, -3, 5, -4.5, 2.5, 3.5];
+                return `--rotation: ${rotations[index % rotations.length]}deg; --hover-rotation: ${hoverRotations[index % rotations.length]}deg;`;
+            }
+        }"
+        x-init="init()"
+    >
+        <!-- 기존 UI 섹션 (상단) --><h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">📝 논문 포스트 잇</h2>
         <p class="text-gray-600 dark:text-gray-300 mb-6">사용자가 관심 있는 논문을 스크랩하고, 중요 부분에 하이라이트나 메모를 추가할 수 있는 디지털 포스트잇 기능 화면입니다.</p>
 
-        <!-- BEST 논문 섹션 -->
-        <div class="p-8 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+        <!-- BEST 논문 섹션 --><div class="p-8 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
             <div class="flex flex-col sm:flex-row justify-between sm:items-baseline mb-4">
-                <h3 class="text-2xl font-extrabold text-black dark:text-white">BEST 논문</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 sm:mt-0">최근 1주일 간 가장 많이 이용된 논문 입니다.</p>
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white flex-shrink-0">글로벌 BEST 피인용 논문</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 sm:mt-0">전 세계 최근 1주일 간 가장 많이 인용된 논문 입니다.(Web Of Science 기준)</p>
             </div>
             <hr class="border-t border-black dark:border-gray-600 mb-4">
             <div class="flex space-x-2 mb-6 flex-wrap">
@@ -44,37 +188,122 @@
                 <button class="px-4 py-1.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-full dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 mb-2">전체</button>
             </div>
             <ol class="space-y-6">
-                <li class="flex items-start text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-6">
-                    <span class="text-2xl font-bold text-gray-400 dark:text-gray-500 mr-6">01</span>
-                    <span class="text-lg">MZ세대의 자기애성향, SNS 이용동기, 과시적 여가소비의 관계</span>
-                </li>
-                <li class="flex items-start text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-6">
-                    <span class="text-2xl font-bold text-gray-400 dark:text-gray-500 mr-6">02</span>
-                    <span class="text-lg">한류 소재 OTT 콘텐츠의 스케이프와 문화적 표상: &lt;케이팝 데몬 헌터스&gt;, &lt;엑스오, 키티&gt;를 중심...</span>
-                </li>
-                <!-- ▼▼▼ 3, 4, 5번 항목 추가 ▼▼▼ -->
-                <li class="flex items-start text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-6">
-                    <span class="text-2xl font-bold text-gray-400 dark:text-gray-500 mr-6">03</span>
-                    <span class="text-lg">AI(인공지능)는 과연 위대한 예술가인가?</span>
-                </li>
-                <li class="flex items-start text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-6">
-                    <span class="text-2xl font-bold text-gray-400 dark:text-gray-500 mr-6">04</span>
-                    <span class="text-lg">정동의 정치와 예술 : 뱅크시(Banksy) 그라피티 분석</span>
-                </li>
-                <li class="flex items-start text-gray-800 dark:text-gray-200 pb-6"> <!-- 이미지에 맞춰 마지막 항목에도 pb-6 추가 -->
-                    <span class="text-2xl font-bold text-gray-400 dark:text-gray-500 mr-6">05</span>
-                    <span class="text-lg">생성형 AI와 제품 디자이너의 디자인 아이디에이션 비교 연구 : 창의성, 혁신성, 공감 능력을 중심으로</span>
-                </li>
-            </ol>
+                <!-- ▼▼▼ 동적 리스트로 변경 ▼▼▼ --><template x-for="(paper, index) in globalPapers" :key="index">
+                    <li class="flex items-start text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700 pb-6">
+                        <span class="text-2xl font-bold text-gray-400 dark:text-gray-500 mr-6" x-text="String(index + 1).padStart(2, '0')"></span>
+                        <span class="text-lg" x-text="paper.title"></span>
+                        <!-- 핀 버튼 추가: SVG 대신 유니코드 기호 사용 --><button @click="selectedPaper = paper" class="group ml-auto flex-shrink-0 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-xl leading-none">
+                            <span class="text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">📌</span>
+                        </button>
+                    </li>
+                </template>
+                <!-- ▲▲▲ 동적 리스트 종료 ▲▲▲ --></ol>
         </div>
 
-        <!-- ▼▼▼ 맞춤 논문 추천 포스트잇 UI (이미지 반영 수정) ▼▼▼ -->
-        <div class="mt-12">
-            <h3 class="text-2xl font-extrabold text-black dark:text-white mb-6">맞춤 논문 추천</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <!-- ▼▼▼ 주제별 인기 학습자료 UI 시작 ▼▼▼ --><div class="mt-16 pt-8 border-t-2 border-gray-200 dark:border-gray-700" x-data="{ mainTab: 'domestic', subTab: 'linguistics' }">
+            <!-- 헤더: 제목, 탭, 검색 --><div class="flex flex-col sm:flex-row justify-between sm:items-baseline mb-6 gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white flex-shrink-0">국내 BEST 피인용 논문</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">최근 국내 학술논문 중 1주일 간 가장 많이 인용된 논문 입니다.(한국 학술지 인용 색인 KCI 기준)</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- 메인 탭 --><div class="border-b border-gray-300 dark:border-gray-600">
+                        <button @click="mainTab = 'domestic'" :class="{'border-b-2 border-black dark:border-white text-black dark:text-white': mainTab === 'domestic', 'text-gray-500': mainTab !== 'domestic'}" class="pb-2 px-2 text-sm font-semibold">국내학술지논문</button>
+                        <button @click="mainTab = 'thesis'" :class="{'border-b-2 border-black dark:border-white text-black dark:text-white': mainTab === 'thesis', 'text-gray-500': mainTab !== 'thesis'}" class="pb-2 px-2 text-sm font-semibold">학위논문</button>
+                    </div>
+                    <!-- 검색창 --><div class="relative">
+                        <input type="text" placeholder="주제분야 찾기" class="border border-gray-400 rounded-md py-1.5 pl-3 pr-8 text-sm w-32 sm:w-auto">
+                        <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                </div>
+            </div>
 
-                <!-- 1. 맞춤 추천 카드 (Yellow) -->
-                <div class="bg-yellow-50 dark:bg-yellow-900/30 p-5 rounded-lg shadow-lg border border-yellow-200 dark:border-yellow-800 h-full flex flex-col">
+            <!-- 메인 카테고리 --><div class="grid grid-cols-5 md:grid-cols-9 gap-2 md:gap-4 mb-6 text-center">
+                <a href="#" class="block group">
+                    <div class="aspect-square relative overflow-hidden rounded-lg border-2 border-orange-500 bg-orange-100 flex items-center justify-center">
+                        <span class="text-orange-800 font-bold">인문학</span>
+                    </div>
+                </a>
+                 <a href="#" class="block group">
+                    <div class="aspect-square relative overflow-hidden rounded-lg bg-blue-100 flex items-center justify-center">
+                        <span class="text-blue-800 font-bold">사회과학</span>
+                    </div>
+                </a>
+                <a href="#" class="block group">
+                    <div class="aspect-square relative overflow-hidden rounded-lg bg-green-100 flex items-center justify-center">
+                        <span class="text-green-800 font-bold">자연과학</span>
+                    </div>
+                </a>
+                <a href="#" class="block group">
+                    <div class="aspect-square relative overflow-hidden rounded-lg bg-gray-200 flex items-center justify-center">
+                        <span class="text-gray-800 font-bold">공학</span>
+                    </div>
+                </a>
+                <a href="#" class="block group">
+                    <div class="aspect-square relative overflow-hidden rounded-lg bg-red-100 flex items-center justify-center">
+                        <span class="text-red-800 font-bold">의약학</span>
+                    </div>
+                </a>
+                <a href="#" class="block group">
+                    <div class="aspect-square relative overflow-hidden rounded-lg bg-yellow-100 flex items-center justify-center">
+                        <span class="text-yellow-800 font-bold text-center text-xs sm:text-base">농수해양</span>
+                    </div>
+                </a>
+                <a href="#" class="block group">
+                    <div class="aspect-square relative overflow-hidden rounded-lg bg-indigo-100 flex items-center justify-center">
+                        <span class="text-indigo-800 font-bold">예술체육</span>
+                    </div>
+                </a>
+                <a href="#" class="block group">
+                    <div class="aspect-square relative overflow-hidden rounded-lg bg-purple-100 flex items-center justify-center">
+                        <span class="text-purple-800 font-bold">교육</span>
+                    </div>
+                </a>
+                <a href="#" class="block group">
+                    <div class="aspect-square relative overflow-hidden rounded-lg bg-slate-200 flex items-center justify-center">
+                        <span class="text-slate-800 font-bold">복합학</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- 서브 카테고리 --><div class="bg-gray-800 dark:bg-black p-2 rounded-md mb-8 relative">
+                <div class="flex items-center space-x-2 overflow-x-auto whitespace-nowrap no-scrollbar">
+                    <button @click="subTab = 'linguistics'" :class="{'bg-white text-black': subTab === 'linguistics', 'text-white hover:bg-gray-700': subTab !== 'linguistics'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">언어학</button>
+                    <button @click="subTab = 'literature'" :class="{'bg-white text-black': subTab === 'literature', 'text-white hover:bg-gray-700': subTab !== 'literature'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">문학일반</button>
+                    <button @click="subTab = 'korean'" :class="{'bg-white text-black': subTab === 'korean', 'text-white hover:bg-gray-700': subTab !== 'korean'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">국어국문학</button>
+                    <button @click="subTab = 'english'" :class="{'bg-white text-black': subTab === 'english', 'text-white hover:bg-gray-700': subTab !== 'english'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">영어영문학</button>
+                    <button @click="subTab = 'chinese'" :class="{'bg-white text-black': subTab === 'chinese', 'text-white hover:bg-gray-700': subTab !== 'chinese'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">중어중문학</button>
+                    <button @click="subTab = 'japanese'" :class="{'bg-white text-black': subTab === 'japanese', 'text-white hover:bg-gray-700': subTab !== 'japanese'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">일어일문학</button>
+                    <button @click="subTab = 'german'" :class="{'bg-white text-black': subTab === 'german', 'text-white hover:bg-gray-700': subTab !== 'german'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">독어독문학</button>
+                    <button @click-="subTab = 'russian'" :class="{'bg-white text-black': subTab === 'russian', 'text-white hover:bg-gray-700': subTab !== 'russian'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">러시아어문학</button>
+                    <button @click="subTab = 'french'" :class="{'bg-white text-black': subTab === 'french', 'text-white hover:bg-gray-700': subTab !== 'french'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">프랑스어문학</button>
+                    <button @click="subTab = 'spanish'" :class="{'bg-white text-black': subTab === 'spanish', 'text-white hover:bg-gray-700': subTab !== 'spanish'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">스페인어문학</button>
+                </div>
+            </div>
+
+            <!-- 논문 목록 --><div class="relative">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                    <!-- ▼▼▼ 동적 리스트로 변경 ▼▼▼ --><template x-for="(paper, index) in domesticPapers" :key="index">
+                        <div class="flex">
+                            <div class="flex-grow">
+                                <a href="#" class="font-semibold text-gray-800 dark:text-gray-200 hover:underline" x-text="paper.title"></a>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" x-text="`${paper.author} | ${paper.journal} | ${paper.year}`"></p>
+                            </div>
+                            <!-- 핀 버튼 추가: SVG 대신 유니코드 기호 사용 --><button @click="selectedPaper = paper" class="group ml-4 flex-shrink-0 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-xl leading-none">
+                                <span class="text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">📌</span>
+                            </button>
+                        </div>
+                    </template>
+                    <!-- ▲▲▲ 동적 리스트 종료 ▲▲▲ --></div>
+                <div class="text-right mt-4">
+                     <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white font-semibold">더보기 +</button>
+                </div>
+            </div>
+        </div>
+        <!-- ▲▲▲ 주제별 인기 학습자료 UI 종료 ▲▲▲ --><!-- ▼▼▼ 맞춤 논문 추천 포스트잇 UI ▼▼▼ --><div class="mt-12 pt-8 border-t-2 border-gray-200 dark:border-gray-700">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">맞춤형 논문 추천</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <!-- 1. 맞춤 추천 카드 (Yellow) --><div class="bg-yellow-50 dark:bg-yellow-900/30 p-5 rounded-lg shadow-lg border border-yellow-200 dark:border-yellow-800 h-full flex flex-col">
                     <div class="flex items-center mb-3">
                         <span class="flex-shrink-0 w-8 h-8 bg-yellow-100 text-yellow-700 rounded-full flex items-center justify-center mr-3">
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
@@ -92,12 +321,10 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- 2. 트렌드 추천 카드 (Red/Pink) -->
-                <div class="bg-red-50 dark:bg-red-900/30 p-5 rounded-lg shadow-lg border border-red-200 dark:border-red-800 h-full flex flex-col">
+                <!-- ... (기존 추천 카드 2, 3, 4) ... --><div class="bg-red-50 dark:bg-red-900/30 p-5 rounded-lg shadow-lg border border-red-200 dark:border-red-800 h-full flex flex-col">
                      <div class="flex items-center mb-3">
                         <span class="flex-shrink-0 w-8 h-8 bg-red-100 text-red-700 rounded-full flex items-center justify-center mr-3">
-                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.933-.207.375-.317.79-.317 1.21 0 .418.11.833.317 1.207.208.375.477.703.822.933a1 1 0 001.45-.385c.345-.23.614-.558.822-.933.208-.375.317-.79.317-1.21s-.11-.834-.317-1.207c-.207-.375-.477-.703-.822-.933zM9.06 8.328a1 1 0 00-1.45.385C7.265 9.088 7 9.49 7 10s.265.912.61 1.288a1 1 0 001.45-.386c.346-.23.614-.558.822-.933.208-.375.317-.79.317-1.21s-.11-.834-.317-1.207c-.207-.375-.477-.703-.822-.933zM3.553 12.395a1 1 0 00-.385 1.45c.23.345.558.614.933.822.375.207.79.317 1.21.317.418 0 .833-.11 1.207-.317.375-.208.703-.477.933-.822a1 1 0 00-.385-1.45c-.345-.23-.614-.558-.822-.933a2.91 2.91 0 00-.317-1.21 2.91 2.91 0 00-.317 1.21c-.207.375-.477.703-.822.933zM16.447 12.395a1 1 0 00-.385 1.45c.23.345.558.614.933.822.375.207.79.317 1.21.317.418 0 .833-.11 1.207-.317.375-.208.703-.477.933-.822a1 1 0 00-.385-1.45c-.345-.23-.614-.558-.822-.933-.208-.375-.317-.79-.317-1.21 0 .418.11.833.317 1.207.207.375.477.703.822.933zM10 7a1 1 0 00-1 1v.01a1 1 0 001 1h.01a1 1 0 001-1V8a1 1 0 00-1-1H10z" clip-rule="evenodd" /></svg>
+                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.933-.207.375-.317.79-.317 1.21 0 .418.11.833.317 1.207.208.375.477.703.822.933a1 1 0 001.45-.385c.345-.23.614-.558.822-.933.208-.375.317-.79.317-1.21s-.11-.834-.317-1.207c-.207-.375-.477-.703-.822-.933zM9.06 8.328a1 1 0 00-1.45.385C7.265 9.088 7 9.49 7 10s.265.912.61 1.288a1 1 0 001.45-.386c.346-.23.614-.558.822-.933.208-.375.317-.79.317-1.21s-.11-.834-.317-1.207c-.207-.375-.477-.703-.822-.933zM3.553 12.395a1 1 0 00-.385 1.45c.23.345.558.614.933.822.375.207.79.317 1.21.317.418 0 .833-.11 1.207-.317.375-.208.703-.477.933-.822a1 1 0 00-.385-1.45c-.345-.23-.614-.558-.822-.933a2.91 2.91 0 00-.317-1.21 2.91 2.91 0 00-.317 1.21c-.207.375-.477.703-.822-.933zM16.447 12.395a1 1 0 00-.385 1.45c.23.345.558.614.933.822.375.207.79.317 1.21.317.418 0 .833-.11 1.207-.317.375-.208.703-.477.933-.822a1 1 0 00-.385-1.45c-.345-.23-.614-.558-.822-.933-.208-.375-.317-.79-.317-1.21 0 .418.11.833.317 1.207.207.375.477.703.822-.933zM10 7a1 1 0 00-1 1v.01a1 1 0 001 1h.01a1 1 0 001-1V8a1 1 0 00-1-1H10z" clip-rule="evenodd" /></svg>
                         </span>
                         <h4 class="font-bold text-lg text-red-900 dark:text-red-200">지금 가장 주목받는 논문</h4>
                     </div>
@@ -112,8 +339,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- 3. 새로운 발견 카드 (Blue/Indigo) -->
                 <div class="bg-blue-50 dark:bg-blue-900/30 p-5 rounded-lg shadow-lg border border-blue-200 dark:border-blue-800 h-full flex flex-col">
                     <div class="flex items-center mb-3">
                         <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mr-3">
@@ -132,8 +357,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- 4. 구독 정보 카드 (Teal/Green) -->
                 <div class="bg-teal-50 dark:bg-teal-900/30 p-5 rounded-lg shadow-lg border border-teal-200 dark:border-teal-800 h-full flex flex-col">
                     <div class="flex items-center mb-3">
                          <span class="flex-shrink-0 w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center mr-3">
@@ -154,267 +377,83 @@
                 </div>
             </div>
         </div>
-        <!-- ▲▲▲ 맞춤 논문 추천 포스트잇 UI 종료 ▲▲▲ -->
+        <!-- ▲▲▲ 맞춤 논문 추천 포스트잇 UI 종료 ▲▲▲ --><!-- ▼▼▼ 논문 포스트잇 UI 시작 (동적 + 검은 대지) ▼▼▼ --><div class="mt-12 pt-8 border-t-2 border-gray-200 dark:border-gray-700">
+            <!-- 배경색 변경 및 패딩 추가 --><div class="bg-gray-800 dark:bg-black p-6 sm:p-8 rounded-lg">
+                <h2 class="text-3xl font-bold text-white dark:text-white mb-6">논문 포스트잇</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
 
-        <!-- ▼▼▼ 주제별 인기 학습자료 UI 시작 ▼▼▼ -->
-        <div class="mt-16 pt-8 border-t-2 border-gray-200 dark:border-gray-700" x-data="{ mainTab: 'domestic', subTab: 'linguistics' }">
-            <!-- 헤더: 제목, 탭, 검색 -->
-            <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
-                <h2 class="text-3xl font-bold text-gray-900 dark:text-white flex-shrink-0">주제별 인기 학습자료</h2>
-                <div class="flex items-center space-x-4">
-                    <!-- 메인 탭 -->
-                    <div class="border-b border-gray-300 dark:border-gray-600">
-                        <button @click="mainTab = 'domestic'" :class="{'border-b-2 border-black dark:border-white text-black dark:text-white': mainTab === 'domestic', 'text-gray-500': mainTab !== 'domestic'}" class="pb-2 px-2 text-sm font-semibold">국내학술지논문</button>
-                        <button @click="mainTab = 'thesis'" :class="{'border-b-2 border-black dark:border-white text-black dark:text-white': mainTab === 'thesis', 'text-gray-500': mainTab !== 'thesis'}" class="pb-2 px-2 text-sm font-semibold">학위논문</button>
-                    </div>
-                    <!-- 검색창 -->
-                    <div class="relative">
-                        <input type="text" placeholder="주제분야 찾기" class="border border-gray-400 rounded-md py-1.5 pl-3 pr-8 text-sm w-32 sm:w-auto">
-                        <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    </div>
-                </div>
-            </div>
+                    <!-- 포스트잇이 없을 때 메시지 --><p x-show="postItNotes.length === 0" class="text-gray-400 text-center col-span-1 sm:col-span-2 md:col-span-3 py-16">
+                        포스트잇이 없습니다. 논문 목록에서 📌 핀을 클릭해 추가해 보세요.
+                    </p>
 
-            <!-- 메인 카테고리 -->
-            <div class="grid grid-cols-5 md:grid-cols-9 gap-2 md:gap-4 mb-6 text-center">
-                <a href="#" class="block group">
-                    <div class="aspect-w-1 aspect-h-1 relative overflow-hidden rounded-lg border-2 border-orange-500">
-                        <img src="https://placehold.co/120x120/FFEDD5/8C2D04?text=인문학" alt="인문학" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                            <span class="text-white font-bold">인문학</span>
+                    <!-- 동적 포스트잇 리스트 --><template x-for="(note, index) in postItNotes" :key="note.title">
+                        <div :class="getPostItClass(index)" :style="getPostItStyle(index)">
+                            <h4 class="font-bold text-lg text-gray-900 dark:text-gray-100 mb-2 leading-tight" x-text="note.title"></h4>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mb-2" x-text="`${note.author} | ${note.journal} | ${note.year}`"></p>
+                            <p class="text-sm text-gray-700 dark:text-gray-300" x-text="note.summary"></p>
                         </div>
-                    </div>
-                </a>
-                <a href="#" class="block group">
-                    <div class="aspect-w-1 aspect-h-1 relative overflow-hidden rounded-lg">
-                        <img src="https://placehold.co/120x120/DBEAFE/1E3A8A?text=사회과학" alt="사회과학" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                            <span class="text-white font-bold">사회과학</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="#" class="block group">
-                    <div class="aspect-w-1 aspect-h-1 relative overflow-hidden rounded-lg">
-                        <img src="https://placehold.co/120x120/D1FAE5/064E3B?text=자연과학" alt="자연과학" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                            <span class="text-white font-bold">자연과학</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="#" class="block group">
-                    <div class="aspect-w-1 aspect-h-1 relative overflow-hidden rounded-lg">
-                        <img src="https://placehold.co/120x120/E5E7EB/1F2937?text=공학" alt="공학" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                            <span class="text-white font-bold">공학</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="#" class="block group">
-                    <div class="aspect-w-1 aspect-h-1 relative overflow-hidden rounded-lg">
-                        <img src="https://placehold.co/120x120/FEE2E2/991B1B?text=의약학" alt="의약학" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                            <span class="text-white font-bold">의약학</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="#" class="block group">
-                    <div class="aspect-w-1 aspect-h-1 relative overflow-hidden rounded-lg">
-                        <img src="https://placehold.co/120x120/FEF9C3/854D0E?text=농수해양" alt="농수해양" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                            <span class="text-white font-bold text-center text-xs sm:text-base">농수해양</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="#" class="block group">
-                    <div class="aspect-w-1 aspect-h-1 relative overflow-hidden rounded-lg">
-                        <img src="https://placehold.co/120x120/E0E7FF/3730A3?text=예술체육" alt="예술체육" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                            <span class="text-white font-bold">예술체육</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="#" class="block group">
-                    <div class="aspect-w-1 aspect-h-1 relative overflow-hidden rounded-lg">
-                        <img src="https://placehold.co/120x120/F3E8FF/6B21A8?text=교육" alt="교육" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                            <span class="text-white font-bold">교육</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="#" class="block group">
-                    <div class="aspect-w-1 aspect-h-1 relative overflow-hidden rounded-lg">
-                        <img src="https://placehold.co/120x120/E2E8F0/475569?text=복합학" alt="복합학" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                            <span class="text-white font-bold">복합학</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
+                    </template>
 
-            <!-- 서브 카테고리 -->
-            <div class="bg-gray-800 dark:bg-black p-2 rounded-md mb-8 relative">
-                <div class="flex items-center space-x-2 overflow-x-auto whitespace-nowrap no-scrollbar">
-                    <button @click="subTab = 'linguistics'" :class="{'bg-white text-black': subTab === 'linguistics', 'text-white hover:bg-gray-700': subTab !== 'linguistics'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">언어학</button>
-                    <button @click="subTab = 'literature'" :class="{'bg-white text-black': subTab === 'literature', 'text-white hover:bg-gray-700': subTab !== 'literature'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">문학일반</button>
-                    <button @click="subTab = 'korean'" :class="{'bg-white text-black': subTab === 'korean', 'text-white hover:bg-gray-700': subTab !== 'korean'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">국어국문학</button>
-                    <button @click="subTab = 'english'" :class="{'bg-white text-black': subTab === 'english', 'text-white hover:bg-gray-700': subTab !== 'english'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">영어영문학</button>
-                    <button @click="subTab = 'chinese'" :class="{'bg-white text-black': subTab === 'chinese', 'text-white hover:bg-gray-700': subTab !== 'chinese'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">중어중문학</button>
-                    <button @click="subTab = 'japanese'" :class="{'bg-white text-black': subTab === 'japanese', 'text-white hover:bg-gray-700': subTab !== 'japanese'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">일어일문학</button>
-                    <button @click="subTab = 'german'" :class="{'bg-white text-black': subTab === 'german', 'text-white hover:bg-gray-700': subTab !== 'german'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">독어독문학</button>
-                    <button @click-="subTab = 'russian'" :class="{'bg-white text-black': subTab === 'russian', 'text-white hover:bg-gray-700': subTab !== 'russian'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">러시아어문학</button>
-                    <button @click="subTab = 'french'" :class="{'bg-white text-black': subTab === 'french', 'text-white hover:bg-gray-700': subTab !== 'french'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">프랑스어문학</button>
-                    <button @click="subTab = 'spanish'" :class="{'bg-white text-black': subTab === 'spanish', 'text-white hover:bg-gray-700': subTab !== 'spanish'}" class="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors">스페인어문학</button>
-                </div>
-            </div>
-
-            <!-- 논문 목록 -->
-            <div class="relative">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-                    <div>
-                        <a href="#" class="font-semibold text-gray-800 dark:text-gray-200 hover:underline">부끄러움/창피함/쑥스러움/수줍음의 관계 고찰</a>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">김아람(Kim, Ahrim) | 한국언어학회 | 2018</p>
-                    </div>
-                    <div>
-                        <a href="#" class="font-semibold text-gray-800 dark:text-gray-200 hover:underline">카카오톡 환경에서의 의사소통 방식 고찰</a>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">심주희(Sim, Juhui) | 한국언어학회 | 2021</p>
-                    </div>
-                    <div>
-                        <a href="#" class="font-semibold text-gray-800 dark:text-gray-200 hover:underline">영어와 한국어 언어 유머 비교 분석</a>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">윤성은 | 이화여자대학교 영어영문학연구소 | 2000</p>
-                    </div>
-                    <div>
-                        <a href="#" class="font-semibold text-gray-800 dark:text-gray-200 hover:underline">AI 디지털교과서 도입의 기대와 우려: AI 및 디지털 도구 활용 실태 조사를 기반으로</a>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">윤선주 | 한국현대언어학회 | 2024</p>
-                    </div>
-                    <div>
-                        <a href="#" class="font-semibold text-gray-800 dark:text-gray-200 hover:underline">『來人之文十五』 소재 報謁의 漢譯에 대하여</a>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">이희영(Lee Hee-young) | 우리어문학회 | 2025</p>
-                    </div>
-                    <div>
-                        <a href="#" class="font-semibold text-gray-800 dark:text-gray-200 hover:underline">아동의 언어발달 단계에 관한 심리학적 연구</a>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">조영현 | 서울사범학교육문제연구소 | 1975</p>
-                    </div>
-                </div>
-                <div class="text-right mt-4">
-                     <button class="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white font-semibold">더보기 +</button>
                 </div>
             </div>
         </div>
-        <!-- ▲▲▲ 주제별 인기 학습자료 UI 종료 ▲▲▲ -->
-
-        <!-- ▼▼▼ 로그인 후 맞춤 대시보드 UI 시작 ▼▼▼ -->
-        <div class="mt-16 pt-8 border-t-4 border-dashed border-gray-300 dark:border-gray-600">
-            <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-white">OOO님을 위한 연구 대시보드</h2>
-            <p class="text-center text-gray-500 dark:text-gray-400 mt-2 mb-12">매일 업데이트되는 최신 연구 동향과 맞춤 논문을 확인해 보세요.</p>
-
-            <!-- [3단계] 최우선 개인화 정보 -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- 섹션 1: 나의 구독 피드 -->
-                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">📬 나의 구독 피드 (My Feed)</h3>
-                    <div class="space-y-6">
-                        <!-- 피드 아이템 1 -->
-                        <div class="flex items-start space-x-4">
-                            <span class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                            </span>
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">[팔로우 저자] 김연구 교수님의 새 논문이 발표되었습니다.</p>
-                                <a href="#" class="font-semibold text-gray-800 dark:text-gray-200 hover:underline">양자 컴퓨팅의 오류 수정에 관한 새로운 접근법</a>
-                            </div>
-                        </div>
-                        <!-- 피드 아이템 2 -->
-                        <div class="flex items-start space-x-4">
-                           <span class="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5a2 2 0 012 2v5a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zm0 14h.01M7 17h5a2 2 0 012 2v5a2 2 0 01-2 2H7a2 2 0 01-2-2v-5a2 2 0 012-2z"></path></svg>
-                            </span>
-                            <div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">[내 관심분야] '머신러닝' 분야 최신 논문 3편이 추가되었습니다.</p>
-                                <a href="#" class="font-semibold text-gray-800 dark:text-gray-200 hover:underline">생성형 AI와 제품 디자이너의 디자인 아이디에이션 비교 연구 외 2편</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- 섹션 2: AI 맞춤 추천 -->
-                <div class="bg-yellow-50 dark:bg-yellow-900/50 p-6 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">🎯 AI 맞춤 추천 (FOR YOU)</h3>
-                    <div class="space-y-4">
-                        <div class="bg-white dark:bg-gray-800 p-4 rounded-md shadow-sm">
-                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">최근 읽으신 'GAN' 논문과 관련 있습니다.</p>
-                            <a href="#" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">StyleGAN3의 이미지 생성 품질 개선 연구</a>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 p-4 rounded-md shadow-sm">
-                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">회원님과 비슷한 연구자들이 함께 읽었습니다.</p>
-                            <a href="#" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">도시 소음이 비둘기 개체 수에 미치는 영향</a>
-                        </div>
-                    </div>
-                </div>
+        <!-- ▲▲▲ 논문 포스트잇 UI 종료 ▲▲▲ --><!-- ▼▼▼ 요약 모달 (팝업) - 가독성 개선 및 정보 추가 ▼▼▼ --><div
+        x-show="selectedPaper"
+        x-cloak
+        @click.away="selectedPaper = null"
+        @keydown.escape.window="selectedPaper = null"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm"
+        style="display: none;"
+    >
+        <div class="bg-white dark:bg-gray-700 rounded-lg shadow-2xl max-w-xl w-full p-8 m-4"
+             @click.stop
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 transform scale-90"
+             x-transition:enter-end="opacity-100 transform scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 transform scale-100"
+             x-transition:leave-end="opacity-0 transform scale-90"
+        >
+            <!-- 모달 헤더 --><div class="flex justify-between items-start pb-4 border-b border-gray-200 dark:border-gray-600 mb-4">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white leading-tight" x-text="selectedPaper?.title"></h3>
+                <button @click="selectedPaper = null" class="p-1 rounded-full text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 dark:hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <!-- [2단계] '내 분야' 중심의 트렌드 -->
-            <div class="mt-12 bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">📈 나의 관심 분야 트렌드</h3>
-                <!-- 트렌드 탭 -->
-                <div x-data="{ tab: 'hot' }" class="w-full">
-                    <div class="border-b border-gray-200 dark:border-gray-700">
-                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                            <button @click="tab = 'hot'" :class="{ 'border-blue-500 text-blue-600': tab === 'hot', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'hot' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">🔥 내 분야 급상승</button>
-                            <button @click="tab = 'new'" :class="{ 'border-blue-500 text-blue-600': tab === 'new', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'new' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">🔔 내 분야 최신</button>
-                        </nav>
-                    </div>
-                    <div class="py-6">
-                        <div x-show="tab === 'hot'">
-                            <ul class="space-y-3">
-                                <li class="text-gray-700 dark:text-gray-300">1. AI(인공지능)는 과연 위대한 예술가인가? <span class="text-red-500 text-xs ml-2">▲320%</span></li>
-                                <li class="text-gray-700 dark:text-gray-300">2. 정동의 정치와 예술 : 뱅크시(Banksy) 그라피티 분석 <span class="text-red-500 text-xs ml-2">▲180%</span></li>
-                            </ul>
-                        </div>
-                        <div x-show="tab === 'new'" style="display: none;">
-                            <ul class="space-y-3">
-                               <li class="text-gray-700 dark:text-gray-300">1. 한류 소재 OTT 콘텐츠의 스케이프와 문화적 표상 <span class="text-gray-400 text-xs ml-2"> (어제)</span></li>
-                               <li class="text-gray-700 dark:text-gray-300">2. MZ세대의 자기애성향, SNS 이용동기, 과시적 여가소비의 관계 <span class="text-gray-400 text-xs ml-2">(3일 전)</span></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+            <!-- 논문 정보 (저자, 학회지, 연도) 추가 --><div class="mb-5 text-gray-600 dark:text-gray-300">
+                <p class="text-sm">
+                    <span class="font-semibold" x-text="selectedPaper?.author"></span> |
+                    <span x-text="selectedPaper?.journal"></span> |
+                    <span x-text="selectedPaper?.year"></span>
+                </p>
             </div>
 
-            <!-- [1단계] 참고용 전체 동향 -->
-            <div class="mt-12">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">🌐 전체 연구 동향 (참고용)</h3>
-                <div class="space-y-4">
-                    <!-- 아코디언 1 -->
-                    <div>
-                        <button class="accordion-toggle flex justify-between items-center w-full p-4 text-left text-gray-800 bg-gray-100 dark:bg-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
-                            <span class="font-semibold">🏆 전체 인기 논문 보기</span>
-                            <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div class="accordion-content mt-2 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                           <p class="text-gray-600 dark:text-gray-400">전체 분야에서 가장 많이 읽힌 논문 목록이 여기에 표시됩니다.</p>
-                        </div>
-                    </div>
-                    <!-- 아코디언 2 -->
-                    <div>
-                        <button class="accordion-toggle flex justify-between items-center w-full p-4 text-left text-gray-800 bg-gray-100 dark:bg-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
-                            <span class="font-semibold">✨ 전체 기관 추천 보기</span>
-                            <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div class="accordion-content mt-2 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                           <p class="text-gray-600 dark:text-gray-400">대학교 및 제휴 기관에서 추천하는 논문 목록이 여기에 표시됩니다.</p>
-                        </div>
-                    </div>
-                </div>
+            <!-- 모달 본문 (요약) --><div class="mb-6">
+                <h4 class="font-semibold text-lg text-gray-800 dark:text-gray-200 mb-2">요약</h4>
+                <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300" x-text="selectedPaper?.summary"></p>
+            </div>
+
+            <!-- 모달 푸터 (버튼) --><div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <button
+                    @click="selectedPaper = null"
+                    class="px-5 py-2.5 text-base font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition-colors"
+                >
+                    닫기
+                </button>
+                <button
+                    @click="addPostIt(selectedPaper)"
+                    class="px-5 py-2.5 text-base font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    포스트잇하기
+                </button>
             </div>
         </div>
-        <!-- ▲▲▲ 로그인 후 맞춤 대시보드 UI 종료 ▲▲▲ -->
-
     </div>
-
-    <!-- Alpine.js for Tabs and other interactions -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <!-- JavaScript for Accordion -->
-    <script>
+    <!-- ▲▲▲ 요약 모달 종료 ▲▲▲ --></div>
+<!-- ▲▲▲ Alpine.js 데이터 컨테이너 종료 ▲▲▲ --><!-- JavaScript for Accordion (This is separate from Alpine.js) --><script>
         document.addEventListener('DOMContentLoaded', function () {
             const accordionToggles = document.querySelectorAll('.accordion-toggle');
             accordionToggles.forEach(button => {
